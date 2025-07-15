@@ -1,4 +1,3 @@
-<!-- test -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -128,10 +127,10 @@
         </td>
     </tr>
     <tr class="label0">
-        <td colspan="2">Receipt & Acknowledgement  استلام و إقرار  </td>
+        <td colspan="2"> اتفاقية مستخدمي أجهزة الحاسب المحمول والأجهزة اللوحية </td>
     </tr>
     <tr>
-        <td colspan="2"> 
+        <td colspan="2" dir="rtl"> 
             @if ($eula)
                 {!! $eula !!}
             @endif
