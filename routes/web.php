@@ -422,6 +422,9 @@ Route::group(['prefix' => 'account', 'middleware' => ['auth']], function () {
     Route::post('accept/{id}', [Account\AcceptanceController::class, 'store'])
         ->name('account.store-acceptance');
 
+    Route::post('generate-asset-eula-pdf', [Account\AcceptanceController::class, 'generateAssetEulaPdf'])
+        ->name('account.generate-asset-eula-pdf');
+
     Route::get(
         'print',
         [

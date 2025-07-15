@@ -34,6 +34,10 @@ class LogListener
      */
     public function onCheckoutableCheckedIn(CheckoutableCheckedIn $event)
     {
+        \Log::debug('LogListener@onCheckoutableCheckedIn', [
+            'asset_id' => $event->checkoutable->id,
+            'note' => $event->note
+        ]);
         $event->checkoutable->logCheckin($event->checkedOutTo, $event->note, $event->action_date, $event->originalValues);
     }
 

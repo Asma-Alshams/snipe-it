@@ -127,7 +127,7 @@
                 },
                 locale: '{{ app()->getLocale() }}',
                 exportOptions: export_options,
-                exportTypes: ['xlsx', 'excel', 'csv', 'pdf', 'json', 'xml', 'txt', 'sql', 'doc'],
+                exportTypes: ['xlsx', 'excel', 'csv', 'json', 'xml', 'txt', 'sql', 'doc'],
                 onLoadSuccess: function () { // possible 'fixme'? this might be for contents, not for headers?
                     $('[data-tooltip="true"]').tooltip(); // Needed to attach tooltips after ajax call
                 },
@@ -167,8 +167,89 @@
         });
     });
 
+    // Custom PDF export handler using server-side Gpdf
+    $(document).on('click', '.export-pdf-server', function(e) {
+        e.preventDefault();
+        
+        var table = $(this).closest('.snipe-table');
+        var tableId = table.attr('id');
+        var fileName = table.data('export-options') ? JSON.parse(table.data('export-options')).fileName : 'export';
+        
+        // Get current table data and parameters
+        var tableData = table.bootstrapTable('getData');
+        var params = table.bootstrapTable('getOptions');
+        
+        // Create form to submit data to server
+        var form = $('<form method="POST" action="{{ route("account.generate-asset-eula-pdf") }}" target="_blank">');
+        form.append('<input type="hidden" name="_token" value="{{ csrf_token() }}">');
+        form.append('<input type="hidden" name="table_data" value="' + JSON.stringify(tableData) + '">');
+        form.append('<input type="hidden" name="table_params" value="' + JSON.stringify(params) + '">');
+        form.append('<input type="hidden" name="table_id" value="' + tableId + '">');
+        form.append('<input type="hidden" name="file_name" value="' + fileName + '">');
+        
+        $('body').append(form);
+        form.submit();
+        form.remove();
+    });
 
+    // Add custom PDF export button to export dropdown
+    $('.snipe-table').each(function() {
+        var table = $(this);
+        var exportDropdown = table.find('.export .dropdown-menu');
+        
+        if (exportDropdown.length > 0) {
+            exportDropdown.append('<li><a href="#" class="export-pdf-server"><i class="fa fa-file-pdf-o"></i> PDF (Server)</a></li>');
+        }
+    });
 
+    // Add test button to page for easy testing
+
+    // Test PDF generation with sample data
+    $(document).on('click', '.test-pdf-generation', function(e) {
+        e.preventDefault();
+        
+        // Sample table data for testing
+        var sampleData = [
+            {
+                'id': '1',
+                'asset_tag': 'ASSET-001',
+                'name': 'Laptop Dell XPS 13',
+                'model': 'Dell XPS 13',
+                'serial': 'SN123456789',
+                'status': 'Deployed',
+                'assigned_to': 'John Doe',
+                'department': 'IT Department',
+                'location': 'Main Office',
+                'manufacturer': 'Dell',
+                'notes': 'High-performance laptop for development'
+            },
+            {
+                'id': '2',
+                'asset_tag': 'ASSET-002',
+                'name': 'Monitor HP 27"',
+                'model': 'HP 27" Monitor',
+                'serial': 'SN987654321',
+                'status': 'Available',
+                'assigned_to': 'Jane Smith',
+                'department': 'Marketing',
+                'location': 'Branch Office',
+                'manufacturer': 'HP',
+                'notes': '4K monitor for design work'
+            }
+        ];
+        
+        // Create form to submit test data
+        var form = $('<form method="POST" action="{{ route("account.generate-asset-eula-pdf") }}" target="_blank">');
+        form.append('<input type="hidden" name="_token" value="{{ csrf_token() }}">');
+        form.append('<input type="hidden" name="table_data" value="' + JSON.stringify(sampleData) + '">');
+        form.append('<input type="hidden" name="table_params" value="{}">');
+        form.append('<input type="hidden" name="table_id" value="testTable">');
+        form.append('<input type="hidden" name="file_name" value="test-export">');
+        
+        $('body').append(form);
+        form.submit();
+        form.remove();
+    });
 
 
     function dateRowCheckStyle(value) {
