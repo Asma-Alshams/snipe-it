@@ -424,20 +424,20 @@ class AcceptanceController extends Controller
             $lastCheckoutLog = $item->log()->where('action_type', 'checkout')->latest()->first();
             $checkout_note = $lastCheckoutLog ? $lastCheckoutLog->note : '';
 
-            // Always get the most recent checkin note for the asset
-            $lastCheckinLog = $item->log()
-                ->where('action_type', 'checkin from')
-                ->whereNotNull('note')
-                ->where('note', '!=', '')
-                ->latest()
-                ->first();
-            $checkin_note = $lastCheckinLog ? $lastCheckinLog->note : '';
+          // Always get the most recent checkin note for the asset (only if it's the latest action)
+$lastCheckinLog = $item->log()
+->where('action_type', 'checkin from')
+->latest()
+->first();
 
-            // Debug logging for checkin note
-            \Log::debug('EULA PDF: Asset ID and checkin note', [
-                'asset_id' => $item->id,
-                'checkin_note' => $checkin_note
-            ]);
+// Use the note only if it's present in the latest log
+$checkin_note = ($lastCheckinLog && !empty($lastCheckinLog->note)) ? $lastCheckinLog->note : '';
+
+// Debug logging for checkin note
+\Log::debug('EULA PDF: Asset ID and checkin note', [
+'asset_id' => $item->id,
+'checkin_note' => $checkin_note
+]);
 
             // Acceptance note from the request (not from the model, which may not be updated yet)
             $acceptance_note = $request->input('note');

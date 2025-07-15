@@ -119,9 +119,15 @@
         <td colspan="2" style="border: none;">
             <table width="100%">
                 <tr>
-                    <td>Checkout Note ملاحظات الاستلام  {{ $checkout_note ?? '' }} </td>
-                    <td>Checkin Note ملاحظات التسليم {{ $checkin_note ?? '' }}</td>
-                    <td>Acceptance Note ملاحظة الموافقة  {{ $acceptance_note ?? '' }}</td>
+                    <td>Checkin Noteملاحظات التسليم 
+                        <br>
+                        {{ $checkin_note ?? '' }}</td>
+                    <td>Checkout Noteملاحظات الاستلام  
+                        <br>
+                        {{ $checkout_note ?? '' }} </td>    
+                    <td>Acceptance Noteملاحظة الموافقة  
+                        <br>
+                        {{ $acceptance_note ?? '' }}</td>
                 </tr>
             </table>
         </td>
@@ -130,11 +136,16 @@
         <td colspan="2"> اتفاقية مستخدمي أجهزة الحاسب المحمول والأجهزة اللوحية </td>
     </tr>
     <tr>
+    
         <td colspan="2" dir="rtl"> 
+        
             @if ($eula)
+            <div dir="rtl" style="text-align: right; unicode-bidi: bidi-override;">
                 {!! $eula !!}
+    </div>
             @endif
         </td>  
+  
     </tr>
     <tr>
         <td colspan="2" style="border: none;">
