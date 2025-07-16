@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar " dir="rtl">
+<html lang="en ">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,7 +12,7 @@
         body {
             font-family:'Dejavu Sans', sans-serif;
             font-size: 12px;
-            direction: rtl;
+            /* direction: rtl; */
             text-align: center;
             margin: 0;
         }
@@ -137,10 +137,10 @@
     </tr>
     <tr>
     
-        <td colspan="2" dir="rtl"> 
+        <td colspan="2" > 
         
             @if ($eula)
-            <div dir="rtl" style="text-align: right; unicode-bidi: bidi-override;">
+            <div  style="text-align: right; unicode-bidi: bidi-override;">
                 {!! $eula !!}
     </div>
             @endif
