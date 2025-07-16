@@ -15,6 +15,7 @@
             /* direction: rtl; */
             text-align: center;
             margin: 0;
+            font-weight: 500;
         }
         table {
             width: 100%;
