@@ -53,23 +53,22 @@
 @section('moar_scripts')
 @include ('partials.bootstrap-table', ['exportFile' => 'maintenances-export', 'search' => true])
 <script nonce="{{ csrf_token() }}">
-    function maintenanceActions(value, row) {
-        var actions = '<nobr>';
-        if ((row) && (row.available_actions.update === true)) {
-            actions += '<a href="{{ config('app.url') }}/hardware/maintenances/' + row.id + '/edit" class="btn btn-sm btn-warning" data-tooltip="true" title="Update"><i class="fas fa-pencil-alt"></i></a>&nbsp;';
-        }
-        actions += '</nobr>'
-        if ((row) && (row.available_actions.delete === true)) {
-            actions += '<a href="{{ config('app.url') }}/hardware/maintenances/' + row.id + '" '
-                + ' class="btn btn-danger btn-sm delete-asset"  data-tooltip="true"  '
-                + ' data-toggle="modal" '
-                + ' data-content="{{ trans('general.sure_to_delete') }} ' + row.name + '?" '
-                + ' data-title="{{  trans('general.delete') }}" onClick="return false;">'
-                + '<i class="fas fa-trash"></i></a></nobr>';
-        }
-
-        return actions;
+window.maintenancesActionsFormatter = function(value, row) {
+    var actions = '';
+    if ((row) && (row.available_actions.update === true)) {
+        actions += '<a href="/maintenances/' + row.id + '/edit" class="btn btn-sm btn-warning" data-tooltip="true" title="Update"><i class="fas fa-pencil-alt"></i></a>&nbsp;';
     }
-
+    // Print PDF button
+    actions += '<a href="/maintenances/' + row.id + '/pdf" class="btn btn-sm btn-info" data-tooltip="true" title="Download" target="_blank"><i class="fas fa-file-pdf"></i></a>&nbsp;';
+    if ((row) && (row.available_actions.delete === true)) {
+        actions += '<a href="/maintenances/' + row.id + '" '
+            + ' class="btn btn-danger btn-sm delete-asset"  data-tooltip="true"  '
+            + ' data-toggle="modal" '
+            + ' data-content="{{ trans('general.sure_to_delete') }} ' + row.name + '?" '
+            + ' data-title="{{  trans('general.delete') }}" onClick="return false;">'
+            + '<i class="fas fa-trash"></i></a>';
+    }
+    return '<nobr>' + actions + '</nobr>';
+};
 </script>
 @stop

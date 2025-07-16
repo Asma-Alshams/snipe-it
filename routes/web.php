@@ -569,6 +569,9 @@ Route::group(['prefix' => 'reports', 'middleware' => ['auth']], function () {
 
 });
 
+Route::get('maintenances/{maintenance}/pdf', [App\Http\Controllers\AssetMaintenancesController::class, 'pdf'])
+    ->name('maintenances.pdf');
+
 
 Route::get(
     'auth/signin',

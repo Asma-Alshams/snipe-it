@@ -7,9 +7,11 @@ use App\Models\AssetMaintenance;
 use App\Models\Company;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use Omaralalwi\Gpdf\Facade\Gpdf as GpdfFacade;
 use Illuminate\Http\Request;
 use \Illuminate\Contracts\View\View;
 use \Illuminate\Http\RedirectResponse;
+
 
 /**
  * This controller handles all actions related to Asset Maintenance for
@@ -215,5 +217,83 @@ class AssetMaintenancesController extends Controller
     public function show(AssetMaintenance $maintenance) : View | RedirectResponse
     {
         return view('asset_maintenances/view')->with('assetMaintenance', $maintenance);
+    }
+
+    /**
+     * Helper to generate PDF using Gpdf with proper options for Arabic/RTL support.
+     *
+     * @param string $viewRoute
+     * @param array $data
+     * @return string
+     */
+    private function generatePdfWithGpdf(string $viewRoute, array $data): string
+    {
+        $html = view($viewRoute, $data)->render();
+        return GpdfFacade::generate($html, [
+            'mode' => 'utf-8',
+            'default_font' => 'dejavusans',
+        ]);
+    }
+
+    /**
+     * Generate a PDF report for a specific asset maintenance.
+     */
+    public function pdf(AssetMaintenance $maintenance)
+    {
+        $this->authorize('view', Asset::class);
+        $maintenance->load('asset');
+        $logo = config('app.logo');
+        $pdfContent = $this->generatePdfWithGpdf('asset_maintenances.pdf', [
+            'maintenance' => $maintenance,
+            'logo' => $logo
+        ]);
+        $filename = 'maintenance-report-' . $maintenance->id . '.pdf';
+        return response($pdfContent, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"'
+        ]);
+    }
+
+    /**
+     * Export asset maintenances as PDF from table data (server-side, Gpdf, Arabic/RTL support)
+     */
+    public function exportPdf(\Illuminate\Http\Request $request)
+    {
+        $tableData = json_decode($request->input('table_data', '[]'), true);
+        $tableParams = json_decode($request->input('table_params', '{}'), true);
+        $tableId = $request->input('table_id', 'maintenances');
+        $fileName = $request->input('file_name', 'maintenances-export');
+
+        $logo = config('app.logo');
+        $data = [
+            'maintenances' => $tableData,
+            'logo' => $logo,
+            'date_settings' => config('app.date_format', 'Y-m-d'),
+        ];
+        $pdfContent = $this->generatePdfWithGpdf('asset_maintenances.pdf', $data);
+        return response($pdfContent, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $fileName . '-' . date('Y-m-d-his') . '.pdf"'
+        ]);
+    }
+
+    /**
+     * Generate a sample PDF for asset maintenance using Gpdf.
+     */
+    public function generatePdf()
+    {
+        $maintenance = AssetMaintenance::with('asset')->first();
+        if (!$maintenance) {
+            abort(404, 'No asset maintenance record found.');
+        }
+        $logo = config('app.logo');
+        $pdfContent = $this->generatePdfWithGpdf('asset_maintenances.pdf', [
+            'maintenance' => $maintenance,
+            'logo' => $logo
+        ]);
+        return response($pdfContent, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="maintenance-sample.pdf"'
+        ]);
     }
 }
