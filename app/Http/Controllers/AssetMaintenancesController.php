@@ -242,10 +242,32 @@ class AssetMaintenancesController extends Controller
     {
         $this->authorize('view', Asset::class);
         $maintenance->load('asset');
-        $logo = config('app.logo');
+        $branding_settings = \App\Http\Controllers\SettingsController::getPDFBranding();
+        $logo = '';
+        if (!is_null($branding_settings->acceptance_pdf_logo)) {
+            $logo = public_path() . '/uploads/' . $branding_settings->acceptance_pdf_logo;
+        } elseif (!is_null($branding_settings->logo)) {
+            $logo = public_path() . '/uploads/' . $branding_settings->logo;
+        }
+        $item_serial = $maintenance->asset ? $maintenance->asset->serial : '';
+        // Get user location (assigned user or asset location)
+        $user = null;
+        if ($maintenance->asset && $maintenance->asset->assignedTo) {
+            $user = $maintenance->asset->assignedTo;
+        }
+        if ($user && isset($user->userloc)) {
+            // user->userloc is available
+        } elseif ($maintenance->asset && isset($maintenance->asset->location)) {
+            // fallback to asset location
+            $user = (object)[ 'userloc' => (object)['name' => $maintenance->asset->location->name ?? '-'] ];
+        } else {
+            $user = (object)[ 'userloc' => (object)['name' => '-'] ];
+        }
         $pdfContent = $this->generatePdfWithGpdf('asset_maintenances.pdf', [
             'maintenance' => $maintenance,
-            'logo' => $logo
+            'logo' => $logo,
+            'item_serial' => $item_serial,
+            'user' => $user
         ]);
         $filename = 'maintenance-report-' . $maintenance->id . '.pdf';
         return response($pdfContent, 200, [
@@ -264,7 +286,13 @@ class AssetMaintenancesController extends Controller
         $tableId = $request->input('table_id', 'maintenances');
         $fileName = $request->input('file_name', 'maintenances-export');
 
-        $logo = config('app.logo');
+        $branding_settings = \App\Http\Controllers\SettingsController::getPDFBranding();
+        $logo = '';
+        if (!is_null($branding_settings->acceptance_pdf_logo)) {
+            $logo = public_path() . '/uploads/' . $branding_settings->acceptance_pdf_logo;
+        } elseif (!is_null($branding_settings->logo)) {
+            $logo = public_path() . '/uploads/' . $branding_settings->logo;
+        }
         $data = [
             'maintenances' => $tableData,
             'logo' => $logo,
@@ -286,10 +314,32 @@ class AssetMaintenancesController extends Controller
         if (!$maintenance) {
             abort(404, 'No asset maintenance record found.');
         }
-        $logo = config('app.logo');
+        $branding_settings = \App\Http\Controllers\SettingsController::getPDFBranding();
+        $logo = '';
+        if (!is_null($branding_settings->acceptance_pdf_logo)) {
+            $logo = public_path() . '/uploads/' . $branding_settings->acceptance_pdf_logo;
+        } elseif (!is_null($branding_settings->logo)) {
+            $logo = public_path() . '/uploads/' . $branding_settings->logo;
+        }
+        $item_serial = $maintenance->asset ? $maintenance->asset->serial : '';
+        // Get user location (assigned user or asset location)
+        $user = null;
+        if ($maintenance->asset && $maintenance->asset->assignedTo) {
+            $user = $maintenance->asset->assignedTo;
+        }
+        if ($user && isset($user->userloc)) {
+            // user->userloc is available
+        } elseif ($maintenance->asset && isset($maintenance->asset->location)) {
+            // fallback to asset location
+            $user = (object)[ 'userloc' => (object)['name' => $maintenance->asset->location->name ?? '-'] ];
+        } else {
+            $user = (object)[ 'userloc' => (object)['name' => '-'] ];
+        }
         $pdfContent = $this->generatePdfWithGpdf('asset_maintenances.pdf', [
             'maintenance' => $maintenance,
-            'logo' => $logo
+            'logo' => $logo,
+            'item_serial' => $item_serial,
+            'user' => $user
         ]);
         return response($pdfContent, 200, [
             'Content-Type' => 'application/pdf',
