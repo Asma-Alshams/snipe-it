@@ -29,6 +29,8 @@
                       ->nullable();
                 $table->longText('notes')
                       ->nullable();
+                $table->longText('repair_method')
+                      ->nullable();
                 $table->decimal('cost', 10, 2)
                       ->nullable();
                 $table->dateTime('deleted_at')

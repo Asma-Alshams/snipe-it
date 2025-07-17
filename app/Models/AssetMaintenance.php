@@ -33,6 +33,7 @@ class AssetMaintenance extends Model implements ICompanyableChild
         'start_date'             => 'required|date_format:Y-m-d',
         'completion_date'        => 'date_format:Y-m-d|nullable|after_or_equal:start_date',
         'notes'                  => 'string|nullable',
+        'repair_method'          => 'string|nullable',
         'cost'                   => 'numeric|nullable',
     ];
 
@@ -52,6 +53,7 @@ class AssetMaintenance extends Model implements ICompanyableChild
         'completion_date',
         'asset_maintenance_time',
         'notes',
+        'repair_method',
         'cost',
     ];
 
@@ -66,6 +68,7 @@ class AssetMaintenance extends Model implements ICompanyableChild
         [
             'title',
             'notes',
+            'repair_method',
             'asset_maintenance_type',
             'cost',
             'start_date',
@@ -140,6 +143,17 @@ class AssetMaintenance extends Model implements ICompanyableChild
             $value = null;
         }
         $this->attributes['notes'] = $value;
+    }
+
+    /**
+     * @param $value
+     */
+    public function setRepairMethodAttribute($value)
+    {
+        if ($value == '') {
+            $value = null;
+        }
+        $this->attributes['repair_method'] = $value;
     }
 
     /**

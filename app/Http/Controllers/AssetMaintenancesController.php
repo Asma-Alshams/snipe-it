@@ -85,6 +85,7 @@ class AssetMaintenancesController extends Controller
             $assetMaintenance->is_warranty = $request->input('is_warranty');
             $assetMaintenance->cost = $request->input('cost');
             $assetMaintenance->notes = $request->input('notes');
+            $assetMaintenance->repair_method = $request->input('repair_method');
 
             // Save the asset maintenance data
             $assetMaintenance->asset_id = $asset->id;
@@ -154,6 +155,7 @@ class AssetMaintenancesController extends Controller
         $maintenance->is_warranty = $request->input('is_warranty', 0);
         $maintenance->cost =  $request->input('cost');
         $maintenance->notes = $request->input('notes');
+        $maintenance->repair_method = $request->input('repair_method');
         $maintenance->asset_maintenance_type = $request->input('asset_maintenance_type');
         $maintenance->title = $request->input('title');
         $maintenance->start_date = $request->input('start_date');
@@ -263,8 +265,13 @@ class AssetMaintenancesController extends Controller
         } else {
             $user = (object)[ 'userloc' => (object)['name' => '-'] ];
         }
+        $userName = $maintenance->created_by
+            ? \App\Models\User::withTrashed()->find($maintenance->created_by)?->name
+            : 'Unknown';
         $pdfContent = $this->generatePdfWithGpdf('asset_maintenances.pdf', [
-            'maintenance' => $maintenance,
+'maintenance' => $maintenance,
+            'assetMaintenance' => $maintenance,
+            'createdByName' => $userName,
             'logo' => $logo,
             'item_serial' => $item_serial,
             'user' => $user

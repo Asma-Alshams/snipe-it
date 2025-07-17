@@ -69,10 +69,17 @@
             <td>{{ $maintenance->completion_date }}</td>
         </tr>
         <tr>
+            <th>Repair Method طريقة التصليح</th>
+            <td>{{ $maintenance->repair_method }}</td>
+        </tr>
+        <tr>
             <th>Notes الملاحظات</th>
             <td>{{ $maintenance->notes }}</td>
         </tr>
     </table>
-    <p style="margin-top:40px; text-align:center; font-size:12px;">Generated on {{ date('Y-m-d H:i') }}</p>
+    <p style="margin-top:40px; text-align:center;">
+        Report Created by {{ $createdByName }}<br>
+        Generated on {{ date('Y-m-d H:i') }}
+    </p>
 </body>
 </html> 

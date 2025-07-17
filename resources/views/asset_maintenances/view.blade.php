@@ -140,6 +140,17 @@ use Carbon\Carbon;
               </div>
             </div> <!-- /row -->
 
+            @if ($assetMaintenance->repair_method)
+            <div class="row">
+              <div class="col-md-3">
+                {{ trans('admin/asset_maintenances/form.repair_method') }}
+              </div>
+              <div class="col-md-9">
+                {!! nl2br(Helper::parseEscapedMarkedownInline($assetMaintenance->repair_method)) !!}
+              </div>
+            </div> <!-- /row -->
+            @endif
+
             @if ($assetMaintenance->notes)
             <div class="row">
               <div class="col-md-3">

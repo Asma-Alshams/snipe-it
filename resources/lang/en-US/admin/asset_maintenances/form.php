@@ -10,6 +10,7 @@
         'is_warranty'            => 'Warranty Improvement',
         'asset_maintenance_time' => 'Asset Maintenance Time (in days)',
         'notes'                  => 'Notes',
+        'repair_method'          => 'Repair Method',
         'update'                 => 'Update Asset Maintenance',
         'create'                 => 'Create Asset Maintenance'
     ];

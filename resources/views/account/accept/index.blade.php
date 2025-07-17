@@ -16,6 +16,41 @@
         <!-- checked out Accessories table -->
 
         <div class="table-responsive">
+          <h3>Accept assets </h3>
+          <table
+                  data-cookie-id-table="pendingAcceptances"
+                  data-id-table="pendingAcceptances"
+                  data-side-pagination="client"
+                  data-show-refresh="false"
+                  data-sort-order="asc"
+                  id="pendingAcceptances"
+                  class="table table-striped snipe-table"
+                  data-export-options='{
+                  "fileName": "my-pending-acceptances-{{ date('Y-m-d') }}",
+                  "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
+                  }'>
+            <thead>
+              <tr>
+                <th>{{ trans('general.name')}}</th>
+                <th>{{ trans('table.actions')}}</th>
+              </tr>
+            </thead>
+            <tbody>
+              @foreach ($acceptances as $acceptance)
+              <tr>
+                @if ($acceptance->checkoutable)
+                <td>{{ ($acceptance->checkoutable) ? $acceptance->checkoutable->present()->name : '' }}</td>
+                <td><a href="{{ route('account.accept.item', $acceptance) }}" class="btn btn-default btn-sm">{{ trans('general.accept_decline') }}</a></td>
+                @else
+                <td> ----- </td>
+                <td> {{ trans('general.error_user_company_accept_view') }} </td>
+                @endif
+              </tr>
+              @endforeach
+            </tbody>
+          </table>
+<br> <br> <br>
+<h3>Accept assets maintenances </h3>
           <table
                   data-cookie-id-table="pendingAcceptances"
                   data-id-table="pendingAcceptances"

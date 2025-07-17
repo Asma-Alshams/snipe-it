@@ -179,14 +179,24 @@
           </div>
         </div>
 
+        <!-- Repair Method -->
+        <div class="form-group {{ $errors->has('repair_method') ? ' has-error' : '' }}">
+          <label for="repair_method" class="col-md-3 control-label">{{ trans('admin/asset_maintenances/form.repair_method') }}</label>
+          <div class="col-md-7">
+            <textarea class="col-md-6 form-control" id="repair_method" name="repair_method">{{ old('repair_method', $item->repair_method) }}</textarea>
+            {!! $errors->first('repair_method', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+          </div>
+        </div>
+
         <!-- Notes -->
-        <div class="form-group {{ $errors->has('notes') ? ' has-error' : '' }}">
+ <div class="form-group {{ $errors->has('notes') ? ' has-error' : '' }}">
           <label for="notes" class="col-md-3 control-label">{{ trans('admin/asset_maintenances/form.notes') }}</label>
           <div class="col-md-7">
             <textarea class="col-md-6 form-control" id="notes" name="notes">{{ old('notes', $item->notes) }}</textarea>
             {!! $errors->first('notes', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
           </div>
         </div>
+      </div> 
       </div> <!-- .box-body -->
 
       <div class="box-footer text-right">
