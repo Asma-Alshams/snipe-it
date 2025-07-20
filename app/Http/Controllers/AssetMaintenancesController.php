@@ -243,7 +243,7 @@ class AssetMaintenancesController extends Controller
     public function pdf(AssetMaintenance $maintenance)
     {
         $this->authorize('view', Asset::class);
-        $maintenance->load('asset');
+        $maintenance->load(['asset', 'asset.assignedTo', 'asset.assignedTo.department']);
         $branding_settings = \App\Http\Controllers\SettingsController::getPDFBranding();
         $logo = '';
         if (!is_null($branding_settings->acceptance_pdf_logo)) {
@@ -268,13 +268,20 @@ class AssetMaintenancesController extends Controller
         $userName = $maintenance->created_by
             ? \App\Models\User::withTrashed()->find($maintenance->created_by)?->name
             : 'Unknown';
+        
+        // Get custom field values
+        $macAddress = $maintenance->asset ? $maintenance->asset->getAttribute('_snipeit_mac_address_1') : null;
+        $maintenanceStatus = $maintenance->asset ? $maintenance->asset->getAttribute('_snipeit_maintenance_status_2') : null;
+        
         $pdfContent = $this->generatePdfWithGpdf('asset_maintenances.pdf', [
 'maintenance' => $maintenance,
             'assetMaintenance' => $maintenance,
             'createdByName' => $userName,
             'logo' => $logo,
             'item_serial' => $item_serial,
-            'user' => $user
+            'user' => $user,
+            'macAddress' => $macAddress,
+            'maintenanceStatus' => $maintenanceStatus
         ]);
         $filename = 'maintenance-report-' . $maintenance->id . '.pdf';
         return response($pdfContent, 200, [
@@ -351,6 +358,63 @@ class AssetMaintenancesController extends Controller
         return response($pdfContent, 200, [
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => 'inline; filename="maintenance-sample.pdf"'
+        ]);
+    }
+
+    /**
+     * Export all asset maintenances as a PDF using the recent_pdf view.
+     */
+    public function exportAllRecentPdf()
+    {
+        $this->authorize('view', Asset::class);
+        $maintenances = \App\Models\AssetMaintenance::with([
+            'asset',
+            'asset.assignedTo',
+            'asset.assignedTo.department',
+            'asset.assetstatus',
+            'adminuser',
+        ])->orderBy('created_at', 'desc')->get();
+        
+        // Add custom field values to each maintenance
+        foreach ($maintenances as $maintenance) {
+            if ($maintenance->asset) {
+                $maintenance->macAddress = $maintenance->asset->getAttribute('_snipeit_mac_address_1');
+                $maintenance->maintenanceStatus = $maintenance->asset->getAttribute('_snipeit_maintenance_status_2');
+                
+                // Get assigned user information using alternative approach
+                if ($maintenance->asset->assigned_type == 'App\Models\User' && $maintenance->asset->assigned_to) {
+                    $assignedUser = \App\Models\User::with('department')->find($maintenance->asset->assigned_to);
+                    $maintenance->assignedUser = $assignedUser;
+                } else {
+                    $maintenance->assignedUser = null;
+                }
+            } else {
+                $maintenance->macAddress = null;
+                $maintenance->maintenanceStatus = null;
+                $maintenance->assignedUser = null;
+            }
+        }
+        
+        $branding_settings = \App\Http\Controllers\SettingsController::getPDFBranding();
+        $logo = '';
+        if (!is_null($branding_settings->acceptance_pdf_logo)) {
+            $logo = public_path() . '/uploads/' . $branding_settings->acceptance_pdf_logo;
+        } elseif (!is_null($branding_settings->logo)) {
+            $logo = public_path() . '/uploads/' . $branding_settings->logo;
+        }
+        $data = [
+            'maintenances' => $maintenances,
+            'logo' => $logo,
+        ];
+        $html = view('asset_maintenances.recent_pdf', $data)->render();
+        $pdfContent = \Omaralalwi\Gpdf\Facade\Gpdf::generate($html, [
+            'mode' => 'utf-8',
+            'default_font' => 'dejavusans',
+        ]);
+        $filename = 'all-maintenance-report-' . date('Y-m-d-his') . '.pdf';
+        return response($pdfContent, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"'
         ]);
     }
 }

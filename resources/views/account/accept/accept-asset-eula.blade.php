@@ -11,7 +11,7 @@
 }
         body {
             font-family:'Dejavu Sans', sans-serif;
-            font-size: 12px;
+            font-size: 16px;
             /* direction: rtl; */
             text-align: center;
             margin: 0;
@@ -24,7 +24,7 @@
             font-family: 'DejaVu Sans', sans-serif;
         }
         td {
-            padding:4px;
+            padding:2px;
         }
         tr:nth-child(odd) td {
             border:1px solid black;
@@ -49,13 +49,14 @@
         <img  width="90%" src="{{ $logo }}">
     </center>
 @endif
-
+<br>
 <div style="display: flex; justify-content: space-between; align-items: flex-start;">
     <div style="text-align: center; flex-grow: 1;">
         <h3 style="margin: 0; font-weight: 600; color: #00008B;">
             Technical Support Requisition Form <br>
             استمارة طلب اجهزة من قسم الدعم الفني 
         </h3>
+        <br>
     </div>
 </div>
 
@@ -95,7 +96,7 @@
         <td> {{ $user->phone }} </td>
         <td> {{ $user->userloc->name }} </td>
     </tr> 
-    <tr><td colspan="2" style="padding-top: 20px;"> </td></tr>
+    <tr><td colspan="2" style="padding-top: 20px;"> <br> </td></tr>
     <tr class="label0">
         <td colspan="2"> Device Details  نوع الجهاز  </td>
     </tr>
@@ -115,7 +116,7 @@
         <td> {{ $item_tag }} </td>
         <td> {{ $item_serial }} </td>
     </tr> 
-    <tr><td colspan="2" style="padding-top: 10px;"> </td></tr>
+    <tr><td colspan="2" style="padding-top: 10px;"> <br> </td></tr>
     <tr>
         <td colspan="2" style="border: none;">
             <table width="100%">
@@ -131,17 +132,17 @@
                         {{ $acceptance_note ?? '' }}</td>
                 </tr>
             </table>
+
         </td>
     </tr>
     <tr class="label0">
-        <td colspan="2"> اتفاقية مستخدمي أجهزة الحاسب المحمول والأجهزة اللوحية </td>
+        <td colspan="2"> <br> اتفاقية مستخدمي أجهزة الحاسب المحمول والأجهزة اللوحية </td>
     </tr>
     <tr>
-    
         <td colspan="2" > 
         
             @if ($eula)
-            <div  style="text-align: right; unicode-bidi: bidi-override;">
+            <div  style="text-align: right; unicode-bidi: bidi-override;  font-size: 14px;">
                 {!! $eula !!}
     </div>
             @endif

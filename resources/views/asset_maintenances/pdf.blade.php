@@ -76,6 +76,11 @@
             <th>Notes الملاحظات</th>
             <td>{{ $maintenance->notes }}</td>
         </tr>
+   
+        <tr>
+            <th>Maintenance Status حالة الصيانة</th>
+            <td>{{ $maintenanceStatus ?? '-' }}</td>
+        </tr>
     </table>
     <p style="margin-top:40px; text-align:center;">
         Report Created by {{ $createdByName }}<br>

@@ -11,6 +11,9 @@
   @can('update', \App\Models\Asset::class)
     <a href="{{ route('maintenances.create') }}" class="btn btn-primary pull-right"> {{ trans('general.create') }}</a>
   @endcan
+  <a href="{{ route('maintenances.pdf.recent') }}" class="btn btn-primary pull-right text-white" style="margin-right:10px;">
+    <i class="fas fa-file-pdf"></i> Generate Report
+  </a>
 @stop
 
 {{-- Page content --}}

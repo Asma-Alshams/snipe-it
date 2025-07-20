@@ -573,6 +573,11 @@ Route::get('maintenances/{maintenance}/pdf', [App\Http\Controllers\AssetMaintena
     ->name('maintenances.pdf');
 
 
+
+Route::get('maintenances/pdf/recent', [App\Http\Controllers\AssetMaintenancesController::class, 'exportAllRecentPdf'])
+    ->name('maintenances.pdf.recent');
+
+
 Route::get(
     'auth/signin',
     [LoginController::class, 'legacyAuthRedirect']
