@@ -31,6 +31,7 @@ use League\Csv\EscapeFormula;
 use App\Http\Requests\CustomAssetReportRequest;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\RedirectResponse;
+use Omaralalwi\Gpdf\Facade\Gpdf as GpdfFacade;
 
 /**
  * This controller handles all actions related to Reports for
@@ -320,6 +321,53 @@ class ReportsController extends Controller
 
 
         return $response;
+    }
+
+    public function generateActivityPdf(Request $request)
+    {
+        $this->authorize('reports.view');
+        $query = \App\Models\Actionlog::with('item', 'user', 'target', 'adminuser');
+        if ($request->input('filter_type') === 'date' && $request->filled('start_date') && $request->filled('end_date')) {
+            $query->whereDate('created_at', '>=', $request->input('start_date'))
+                  ->whereDate('created_at', '<=', $request->input('end_date'));
+        } elseif ($request->input('filter_type') === 'location' && $request->filled('location_id')) {
+            $query->where(function($q) use ($request) {
+                $q->where('target_type', 'App\\Models\\Location')
+                  ->where('target_id', $request->input('location_id'));
+                $q->orWhere('location_id', $request->input('location_id'));
+            });
+        }
+        $logs = $query->orderBy('created_at', 'desc')->get();
+        $rows = [];
+        foreach ($logs as $log) {
+            $rows[] = [
+                'date' => $log->created_at->format('Y-m-d H:i'),
+                'created_by' => $log->adminuser ? $log->adminuser->getFullNameAttribute() : '',
+                'action' => $log->present()->actionType(),
+                'item' => $log->item ? $log->item->getDisplayNameAttribute() : '',
+                'target' => $log->target ? ($log->targetType() == 'user' ? $log->target->getFullNameAttribute() : $log->target->getDisplayNameAttribute()) : '',
+            ];
+        }
+        $branding_settings = \App\Http\Controllers\SettingsController::getPDFBranding();
+        $logo = '';
+        if (!is_null($branding_settings->acceptance_pdf_logo)) {
+            $logo = public_path() . '/uploads/' . $branding_settings->acceptance_pdf_logo;
+        } elseif (!is_null($branding_settings->logo)) {
+            $logo = public_path() . '/uploads/' . $branding_settings->logo;
+        }
+        $html = view('reports.activity_pdf', [
+            'rows' => $rows,
+            'start_date' => $request->input('start_date'),
+            'end_date' => $request->input('end_date'),
+            'location' => $request->input('location_id') ? \App\Models\Location::find($request->input('location_id')) : null,
+            'logo' => $logo,
+        ])->render();
+        $pdfContent = GpdfFacade::generate($html);
+        $filename = 'activity-report-' . date('Y-m-d-his') . '.pdf';
+        return response($pdfContent, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"'
+        ]);
     }
 
 

@@ -22,6 +22,17 @@ class AssetMaintenancesTransformer
 
     public function transformAssetMaintenance(AssetMaintenance $assetmaintenance)
     {
+        // Signature logic
+        $signature = null;
+        if ($assetmaintenance->asset) {
+            $acceptance = $assetmaintenance->maintenanceAcceptances()
+                ->where('assigned_to_id', $assetmaintenance->asset->assigned_to)
+                ->first();
+            if ($acceptance && $acceptance->signature_filename) {
+                $signature = asset('uploads/signatures/' . $acceptance->signature_filename);
+            }
+        }
+
         $array = [
             'id'            => (int) $assetmaintenance->id,
             'asset' => ($assetmaintenance->asset) ? [
@@ -80,6 +91,7 @@ class AssetMaintenancesTransformer
             'created_at' => Helper::getFormattedDateObject($assetmaintenance->created_at, 'datetime'),
             'updated_at' => Helper::getFormattedDateObject($assetmaintenance->updated_at, 'datetime'),
             'is_warranty'=> $assetmaintenance->is_warranty,
+            'signature' => $signature,
 
         ];
 

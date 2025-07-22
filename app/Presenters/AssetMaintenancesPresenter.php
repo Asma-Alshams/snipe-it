@@ -112,6 +112,14 @@ class AssetMaintenancesPresenter extends Presenter
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('admin/asset_maintenances/form.repair_method'),
+            ],
+            [
+                'field' => 'signature',
+                'searchable' => false,
+                'sortable' => false,
+                'title' => trans('general.signature'),
+                'formatter' => 'window.maintenanceSignatureFormatter',
+                'align' => 'center',
             ], [
                 'field' => 'is_warranty',
                 'searchable' => true,

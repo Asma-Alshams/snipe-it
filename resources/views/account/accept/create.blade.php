@@ -38,28 +38,42 @@
         <!-- CSRF Token -->
         <input type="hidden" name="_token" value="{{ csrf_token() }}" />
 
-
         <div class="row">
             <div class="col-sm-12 col-sm-offset-1 col-md-10 col-md-offset-1">
                 <div class="panel box box-default">
                     <div class="box-body">
-                        <div class="col-md-12" style="padding-top: 20px;">
+                    <p style="text-align: center; font-size: 18px; padding-top: 20px;">  <strong>اتفاقية مستخدمي أجهزة الحاسب المحمول والأجهزة اللوحية</strong></p>
+                        <div class="col-md-12" style="padding-top: 20px; ; direction: rtl;">
+                           
                         @if ($acceptance->checkoutable->getEula())
                             <div id="eula_div" style="padding-bottom: 20px">
                                 {!!  $acceptance->checkoutable->getEula() !!}
                             </div>
                         @endif
+                      
+                        </div>
+                        <div class="col-md-12">
+                            <div class="col-md-12" style="margin-bottom: 15px; direction: rtl; text-align: center; font-size: 15px;">
+                                <strong>{{ __('تاريخ التسليم') }}:
+                                    {{ \App\Helpers\Helper::getFormattedDateObject($acceptance->created_at, 'date')["formatted"] }}
+                                    &nbsp;
+                                    @if($acceptance->checkoutable->expected_checkin)
+                                        {{ __('تاريخ الاسترجاع المتوقع') }}: {{ \App\Helpers\Helper::getFormattedDateObject($acceptance->checkoutable->expected_checkin, 'date')["formatted"] }}
+                                    @else
+                                       ( {{ __('اصل ثابت') }} )
+                                    @endif
+                                </strong> </div>
                         </div>
                         <div class="col-md-12">
                         <h3>{{$acceptance->checkoutable->present()->name()}}</h3>
                         </div>
                         <div class="col-md-12">
                             <label class="form-control">
-                                <input type="radio" name="asset_acceptance" id="accepted" value="accepted">
+                                <input type="radio" name="acceptance" id="accepted" value="accepted">
                                 {{trans('general.i_accept')}}
                             </label>
                             <label class="form-control">
-                                <input type="radio" name="asset_acceptance" id="declined" value="declined">
+                                <input type="radio" name="acceptance" id="declined" value="declined">
                                 {{trans('general.i_decline')}}
                             </label>
 
@@ -156,7 +170,7 @@
             }
         });
         
-        $('[name="asset_acceptance"]').on('change', function() {
+        $('[name="acceptance"]').on('change', function() {
 
             if ($(this).is(':checked') && $(this).attr('id') == 'declined') {
                 $("#showEmailBox").hide();

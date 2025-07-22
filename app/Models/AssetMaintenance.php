@@ -202,6 +202,55 @@ class AssetMaintenance extends Model implements ICompanyableChild
     }
 
     /**
+     * Get the maintenance acceptance records
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function maintenanceAcceptances()
+    {
+        return $this->hasMany(\App\Models\MaintenanceAcceptance::class, 'maintenance_id');
+    }
+
+    /**
+     * Create acceptance record for the assigned user
+     *
+     * @return void
+     */
+    public function createAcceptanceRecord()
+    {
+        if ($this->asset && $this->asset->assigned_to && $this->asset->assigned_type == 'App\\Models\\User') {
+            // Check if acceptance record already exists
+            $assignedToId = $this->asset->assigned_to;
+            if (!$assignedToId) {
+                return; // Don't create if no assigned user
+            }
+            $existingAcceptance = $this->maintenanceAcceptances()
+                ->where('assigned_to_id', $assignedToId)
+                ->first();
+            
+            if (!$existingAcceptance) {
+                $this->maintenanceAcceptances()->create([
+                    'assigned_to_id' => $assignedToId,
+                    'maintenance_id' => $this->id,
+                ]);
+            }
+        }
+    }
+
+    /**
+     * Boot method to handle model events
+     */
+    protected static function boot()
+    {
+        parent::boot();
+        
+        // Delete related maintenance acceptances when maintenance is deleted
+        static::deleting(function ($maintenance) {
+            $maintenance->maintenanceAcceptances()->delete();
+        });
+    }
+
+    /**
      * -----------------------------------------------
      * BEGIN QUERY SCOPES
      * -----------------------------------------------

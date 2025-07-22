@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Recent Asset Maintenances</title>
+    <title>Periodic Asset Maintenance Checklist</title>
     <style>
            @page {
   margin: 2mm 6mm 2mm 6mm; /* top, right, bottom, left */ size: landscape; }
@@ -20,6 +20,13 @@
 </head>
 <body>
     <h2>Periodic Asset Maintenance Checklist<br> قائمة الصيانة الدورية للأصول </h2>
+    @if(isset($filter) && $start_date && $end_date)
+        @if($filter === 'created_at')
+            <p style="text-align:center;">Created At: from {{ $start_date }} to {{ $end_date }}</p>
+        @elseif($filter === 'maintenance_date')
+            <p style="text-align:center;">Maintenance date: from {{ $start_date }} to {{ $end_date }}</p>
+        @endif
+    @endif
     <table>
         <thead>
             <tr>
@@ -33,7 +40,7 @@
                 <th>Repair Method</th>
                 <th>Start Date</th>
                 <th>End Date</th>
-               
+                <th>Signature</th>
             </tr>
         </thead>
         <tbody>
@@ -47,7 +54,7 @@
                         @else
                             -
                         @endif
-                    </td>
+                     </td>
                     <td>
                         @if($m->assignedUser)
                             @if(method_exists($m->assignedUser, 'present') && $m->assignedUser->present())
@@ -65,7 +72,19 @@
                     <td>{{ $m->repair_method ?? '-' }}</td>
                     <td>{{ $m->start_date ?? '-' }}</td>
                     <td>{{ $m->completion_date ?? '-' }}</td>
-                   
+                    <td>
+                        @php
+                            $acceptance = $m->maintenanceAcceptances->where('assigned_to_id', $m->asset->assigned_to ?? null)->first();
+                            $signature = $acceptance && $acceptance->signature_filename
+                                ? asset('uploads/signatures/' . $acceptance->signature_filename)
+                                : null;
+                        @endphp
+                        @if($signature)
+                            <img src="{{ $signature }}" alt="Signature" style="max-width:200px;" />
+                        @else
+                            -
+                        @endif
+                    </td>
                 </tr>
             @endforeach
         </tbody>

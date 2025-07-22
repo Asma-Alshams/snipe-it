@@ -109,6 +109,9 @@ class AssetMaintenancesController extends Controller
             if (!$assetMaintenance->save()) {
                 return redirect()->back()->withInput()->withErrors($assetMaintenance->getErrors());
             }
+
+            // Create acceptance record for the assigned user
+            $assetMaintenance->createAcceptanceRecord();
         }
 
         return redirect()->route('maintenances.index')
@@ -364,16 +367,32 @@ class AssetMaintenancesController extends Controller
     /**
      * Export all asset maintenances as a PDF using the recent_pdf view.
      */
-    public function exportAllRecentPdf()
+    public function exportAllRecentPdf(Request $request)
     {
         $this->authorize('view', Asset::class);
-        $maintenances = \App\Models\AssetMaintenance::with([
+        $maintenancesQuery = \App\Models\AssetMaintenance::with([
             'asset',
             'asset.assignedTo',
-            'asset.assignedTo.department',
             'asset.assetstatus',
             'adminuser',
-        ])->orderBy('created_at', 'desc')->get();
+        ])->whereDoesntHave('maintenanceAcceptances', function($query) {
+            $query->where('assigned_to_id', auth()->id())
+                  ->whereNotNull('declined_at');
+        });
+
+        // Filtering logic
+        if ($request->filled('filter') && $request->filled('start_date') && $request->filled('end_date')) {
+            $start = $request->input('start_date');
+            $end = $request->input('end_date');
+            if ($request->input('filter') === 'created_at') {
+                $maintenancesQuery->whereDate('created_at', '>=', $start)
+                                  ->whereDate('created_at', '<=', $end);
+            } elseif ($request->input('filter') === 'maintenance_date') {
+                $maintenancesQuery->whereDate('start_date', '>=', $start)
+                                  ->whereDate('completion_date', '<=', $end);
+            }
+        }
+        $maintenances = $maintenancesQuery->orderBy('created_at', 'desc')->get();
         
         // Add custom field values to each maintenance
         foreach ($maintenances as $maintenance) {
@@ -405,6 +424,9 @@ class AssetMaintenancesController extends Controller
         $data = [
             'maintenances' => $maintenances,
             'logo' => $logo,
+            'filter' => $request->input('filter'),
+            'start_date' => $request->input('start_date'),
+            'end_date' => $request->input('end_date'),
         ];
         $html = view('asset_maintenances.recent_pdf', $data)->render();
         $pdfContent = \Omaralalwi\Gpdf\Facade\Gpdf::generate($html, [

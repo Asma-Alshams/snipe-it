@@ -7,7 +7,7 @@
     <meta http-equiv="Content-Type" content="text/html">
     <style>
       @page {
-  margin: 2mm 10mm 2mm 10mm; /* top, right, bottom, left */
+  margin: 3mm 10mm 3mm 10mm; /* top, right, bottom, left */
 }
         body {
             font-family:'Dejavu Sans', sans-serif;
@@ -46,15 +46,15 @@
 
 @if ($logo)
     <center>
-        <img  width="90%" src="{{ $logo }}">
+        <img  width="100%" src="{{ $logo }}">
     </center>
 @endif
 <br>
 <div style="display: flex; justify-content: space-between; align-items: flex-start;">
     <div style="text-align: center; flex-grow: 1;">
         <h3 style="margin: 0; font-weight: 600; color: #00008B;">
-            Technical Support Requisition Form <br>
-            استمارة طلب اجهزة من قسم الدعم الفني 
+           
+            استمارة تسليم واستلام عهدة من ادارة النظم والحلول الرقمية 
         </h3>
         <br>
     </div>
@@ -62,110 +62,118 @@
 
 <table>
     <tr class="label0">
-        <td colspan="2">{{$user->notes }}  Requestor Information  بيانات مقدم الطلب   </td>
+        <td colspan="2"> بيانات مقدم الطلب   </td>
     </tr>
     <tr>
-        <td class="label"> Name  الاسم   </td> 
-        <td class="label"> Designation  المسمى الوظيفي  </td>  
+        <td class="label">  المسمى الوظيفي  </td> 
+        <td class="label">  الاسم   </td>  
     </tr>
     <tr>
-        <td> {{$assigned_to}} </td>
         <td> {{ $user->jobtitle }} </td>
+        <td> {{$assigned_to}} </td>
     </tr>
     <tr>
-        <td class="label"> Employee No.  الرقم الوظيفي  </td>
-        <td class="label"> Directorate/Department  الإدارة/القسم  </td>
+        <td class="label">  الإدارة/القسم  </td>
+        <td class="label">   الرقم الوظيفي  </td>
     </tr>
     <tr>
-        <td> {{ $user->employee_num }} </td>
         <td> {{ $user->department->name }} </td>
+        <td>{{ $user->employee_num }} </td>
     </tr>
     <tr>
-        <td class="label">  Email  البريد الإلكتروني  </td>
-        <td class="label">  Request Date  تاريخ الطلب  </td>
+        <td class="label">   تاريخ الطلب   </td>
+        <td class="label">  مكان مقدم الطلب   </td>
     </tr>
     <tr>
-        <td> {{ $user->email }} 
-        <td> {{ date($date_settings) }} </td>
-    </tr>
-    <tr>
-        <td class="label"> Mobile  النقال </td>
-        <td class="label"> Requestor Location  مكان مقدم الطلب  </td>
-    </tr>
-    <tr>
-        <td> {{ $user->phone }} </td>
+        <td>   {{ date($date_settings) }} </td>
         <td> {{ $user->userloc->name }} </td>
+    </tr>
+    <tr>
+        <td class="label"> تاريخ المتوقع تسليمه </td>
+        <td class="label">  تاريخ التسليم  </td>
+    </tr>
+    <tr>
+        <td>   {{ $asset->expected_checkin ? \App\Helpers\Helper::getFormattedDateObject($asset->expected_checkin, 'date')["formatted"] : 'اصل ثابت' }}</td>
+        <td> {{$check_out_date}} </td>
     </tr> 
     <tr><td colspan="2" style="padding-top: 20px;"> <br> </td></tr>
     <tr class="label0">
-        <td colspan="2"> Device Details  نوع الجهاز  </td>
+        <td colspan="2">   نوع الجهاز  </td>
     </tr>
     <tr>
-        <td class="label"> Model No. رقم الطراز   </td>
-        <td class="label">  Device Brand   ماركة الجهاز </td>
+        <td class="label">  ماركة الجهاز   </td>
+        <td class="label"> رقم الطراز  </td>
     </tr>
     <tr>
-        <td> {{ $item_model }} </td>
-        <td>{{ $asset->model->manufacturer->name ?? '' }}</td>
+        <td>{{ $asset->model->manufacturer->name ?? '' }} </td>
+        <td> {{ $item_model }}</td>
     </tr>
     <tr>
-        <td class="label"> Asset Tag  علامة الاصل  </td>
-        <td class="label"> Serial No.  رقم التسلسل   </td>
+        <td class="label"> رقم التسلسل   </td>
+        <td class="label">   علامة الاصل  </td>
     </tr>
     <tr>
-        <td> {{ $item_tag }} </td>
-        <td> {{ $item_serial }} </td>
+        <td>{{ $item_serial }}</td>
+        <td>  {{ $item_tag }}  </td>
     </tr> 
+        <td class="label">الملحقات</td>
+        <td class="label">تاريخ الشراء</td>
+    </tr>
+    <tr>
+        <td>{{ $asset->notes ?? '-' }}</td>
+        <td>{{ $asset->purchase_date ? \App\Helpers\Helper::getFormattedDateObject($asset->purchase_date, 'date')["formatted"] : '-' }}</td>
+    </tr>
+    
     <tr><td colspan="2" style="padding-top: 10px;"> <br> </td></tr>
     <tr>
         <td colspan="2" style="border: none;">
             <table width="100%">
                 <tr>
-                    <td>Checkin Noteملاحظات التسليم 
+                    <td>:ملاحظات التسليم 
                         <br>
                         {{ $checkin_note ?? '' }}</td>
-                    <td>Checkout Noteملاحظات الاستلام  
+                    <td>:ملاحظات الاستلام  
                         <br>
                         {{ $checkout_note ?? '' }} </td>    
-                    <td>Acceptance Noteملاحظة الموافقة  
+                    <td>:ملاحظة الموافقة  
                         <br>
                         {{ $acceptance_note ?? '' }}</td>
                 </tr>
             </table>
-
         </td>
-    </tr>
+    </tr> 
+            <div style="page-break-before: always;"></div>
+    <tr>
     <tr class="label0">
-        <td colspan="2"> <br> اتفاقية مستخدمي أجهزة الحاسب المحمول والأجهزة اللوحية </td>
+        <td colspan="2">  اتفاقية مستخدمي أجهزة الحاسب المحمول والأجهزة اللوحية </td>
     </tr>
     <tr>
         <td colspan="2" > 
-        
             @if ($eula)
-            <div  style="text-align: right; unicode-bidi: bidi-override;  font-size: 14px;">
+            <div  style="text-align: right; unicode-bidi: bidi-override;  font-size: 13px; padding: 6px;">
                 {!! $eula !!}
     </div>
             @endif
         </td>  
   
     </tr>
-    <tr>
+    <!-- <tr>
         <td colspan="2" style="border: none;">
             <table width="100%">
                 <tr>
-                    <td> {{ trans('general.assigned_date') }}: {{$check_out_date}}</td>
-                    <td> {{ trans('general.assignee') }}: {{$assigned_to}}</td>
-                    <td> {{ trans('general.accepted_date') }}: {{$accepted_date}}</td>
+                    <td> مخصص ل: {{$assigned_to}}</td>
+                    <td> تاريخ القبول: {{$accepted_date}}</td>
                 </tr>
             </table>
         </td>
-    </tr>
+    </tr> -->
 </table>      
 
 @if ($signature!='')
 <img src="{{ $signature }}" style="max-width: 350px; border-bottom: black solid 1px;">
 @endif
-<h4 >{{$assigned_to}}</h4>
-      
+<p>{{$assigned_to}}    <br>   
+تاريخ القبول: {{$accepted_date}}
+    </p>
 </body>
 </html>

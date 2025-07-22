@@ -45,7 +45,8 @@ class AcceptanceController extends Controller
     public function index() : View
     {
         $acceptances = CheckoutAcceptance::forUser(auth()->user())->pending()->get();
-        return view('account/accept.index', compact('acceptances'));
+        $maintenanceAcceptances = \App\Http\Controllers\Account\AcceptanceMaintenanceController::getPendingForUser(auth()->user());
+        return view('account/accept.index', compact('acceptances', 'maintenanceAcceptances'));
     }
 
     /**
@@ -304,7 +305,7 @@ class AcceptanceController extends Controller
             return redirect()->route('account.accept')->with('error', trans('general.insufficient_permissions'));
         }
 
-        if (! $request->filled('asset_acceptance')) {
+        if (! $request->filled('acceptance')) {
             return redirect()->back()->with('error', trans('admin/users/message.error.accept_or_decline'));
         }
 
@@ -323,7 +324,7 @@ class AcceptanceController extends Controller
         $pdf_filename = 'accepted-eula-'.date('Y-m-d-h-i-s').'.pdf';
         $sig_filename='';
 
-        if ($request->input('asset_acceptance') == 'accepted') {
+        if ($request->input('acceptance') == 'accepted') {
 
             /**
              * Check for the eula-pdfs directory
@@ -493,7 +494,7 @@ $checkin_note = ($lastCheckinLog && !empty($lastCheckinLog->note)) ? $lastChecki
 
             $return_msg = trans('admin/users/message.accepted');
 
-        } else {
+        } else if ($request->input('acceptance') == 'declined') {
 
             /**
              * Check for the eula-pdfs directory
@@ -590,7 +591,7 @@ $checkin_note = ($lastCheckinLog && !empty($lastCheckinLog->note)) ? $lastChecki
                     Mail::to($recipient)->send(new CheckoutAcceptanceResponseMail(
                         $acceptance,
                         $recipient,
-                        $request->input('asset_acceptance') === 'accepted',
+                        $request->input('acceptance') === 'accepted',
                     ));
                 }
             } catch (Exception $e) {
