@@ -7,13 +7,95 @@
 @stop
 
 @section('header_right')
-    <form method="POST" action="{{ route('reports.activity.post') }}" accept-charset="UTF-8" class="form-horizontal">
+    <form method="POST" action="{{ route('reports.activity.post') }}" accept-charset="UTF-8" class="form-horizontal" style="display:inline-block;">
     {{csrf_field()}}
+  
+    </form>
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#activityReportModal" style="margin-left:10px;">
+        <i class="fas fa-file-pdf"></i> Generate Report
+    </button>
     <button type="submit" class="btn btn-default">
         <x-icon type="download" />
         {{ trans('general.download_all') }}
     </button>
-    </form>
+    <!-- Modal for PDF report generation -->
+    <div class="modal fade" id="activityReportModal" tabindex="-1" role="dialog" aria-labelledby="activityReportModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="activityReportModalLabel">Generate Activity Report (PDF)</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <form method="GET" action="{{ route('reports.activity.pdf') }}" id="activityReportForm">
+            <div class="modal-body">
+              <div class="form-group">
+                <label for="filterType">Filter By</label>
+                <select class="form-control" id="filterType" name="filter_type">
+                  <option value="date">Created By Date</option>
+                  <option value="location">Location (Target)</option>
+                </select>
+              </div>
+              <div id="dateFields">
+                <div class="form-group">
+                  <label for="start_date">Start Date</label>
+                  <input type="date" class="form-control" name="start_date" id="start_date">
+                </div>
+                <div class="form-group">
+                  <label for="end_date">End Date</label>
+                  <input type="date" class="form-control" name="end_date" id="end_date">
+                </div>
+              </div>
+              <div id="locationField" style="display:none;">
+                <div class="form-group">
+                  <label for="location_id">Location</label>
+                  <select class="form-control" name="location_id" id="location_id">
+                    <option value="">-- Select Location --</option>
+                    @foreach(\App\Models\Location::orderBy('name')->get() as $location)
+                      <option value="{{ $location->id }}">{{ $location->name }}</option>
+                    @endforeach
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <button type="submit" class="btn btn-primary">Generate PDF</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        var filterType = document.getElementById('filterType');
+        var dateFields = document.getElementById('dateFields');
+        var locationField = document.getElementById('locationField');
+        function updateFields() {
+          if (filterType.value === 'date') {
+            dateFields.style.display = '';
+            locationField.style.display = 'none';
+            document.getElementById('start_date').required = true;
+            document.getElementById('end_date').required = true;
+            document.getElementById('location_id').required = false;
+          } else if (filterType.value === 'location') {
+            dateFields.style.display = 'none';
+            locationField.style.display = '';
+            document.getElementById('start_date').required = false;
+            document.getElementById('end_date').required = false;
+            document.getElementById('location_id').required = true;
+          }
+        }
+        filterType.addEventListener('change', updateFields);
+        // Set initial state when modal is shown
+        $('#activityReportModal').on('show.bs.modal', function () {
+          updateFields();
+        });
+        // Also set initial state on page load
+        updateFields();
+      });
+    </script>
 @stop
 
 {{-- Page content --}}

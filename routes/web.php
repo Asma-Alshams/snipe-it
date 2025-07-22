@@ -441,6 +441,13 @@ Route::group(['prefix' => 'account', 'middleware' => ['auth']], function () {
         ]
     )->name('profile.email_assets');
 
+    Route::get('accept/maintenance/{id}', [Account\AcceptanceMaintenanceController::class, 'createMaintenance'])
+        ->name('account.accept.maintenance');
+    Route::post('accept/maintenance/{id}', [Account\AcceptanceMaintenanceController::class, 'storeMaintenance'])
+        ->name('account.accept.maintenance.store');
+    Route::get('accept/maintenance/eula/{id}', [Account\AcceptanceMaintenanceController::class, 'showEula'])
+        ->name('account.accept.maintenance.eula');
+
 });
 
 Route::group(['middleware' => ['auth']], function () {
@@ -566,6 +573,8 @@ Route::group(['prefix' => 'reports', 'middleware' => ['auth']], function () {
     Route::post(
         'unaccepted_assets/{deleted?}', [ReportsController::class, 'postAssetAcceptanceReport'])
         ->name('reports/export/unaccepted_assets');
+
+    Route::get('reports/activity/pdf', [ReportsController::class, 'generateActivityPdf'])->name('reports.activity.pdf');
 
 });
 
