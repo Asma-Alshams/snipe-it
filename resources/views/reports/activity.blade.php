@@ -35,6 +35,7 @@
                 <select class="form-control" id="filterType" name="filter_type">
                   <option value="date">Created By Date</option>
                   <option value="location">Location (Target)</option>
+                  <option value="date_location">Date and Location</option>
                 </select>
               </div>
               <div id="dateFields">
@@ -72,19 +73,31 @@
         var filterType = document.getElementById('filterType');
         var dateFields = document.getElementById('dateFields');
         var locationField = document.getElementById('locationField');
+        var startDate = document.getElementById('start_date');
+        var endDate = document.getElementById('end_date');
+        var locationId = document.getElementById('location_id');
         function updateFields() {
           if (filterType.value === 'date') {
             dateFields.style.display = '';
             locationField.style.display = 'none';
-            document.getElementById('start_date').required = true;
-            document.getElementById('end_date').required = true;
-            document.getElementById('location_id').required = false;
+            startDate.required = true;
+            endDate.required = true;
+            locationId.required = false;
+            locationId.value = ''; // Clear location when switching to date
           } else if (filterType.value === 'location') {
             dateFields.style.display = 'none';
             locationField.style.display = '';
-            document.getElementById('start_date').required = false;
-            document.getElementById('end_date').required = false;
-            document.getElementById('location_id').required = true;
+            startDate.required = false;
+            endDate.required = false;
+            locationId.required = true;
+            startDate.value = ''; // Clear start date when switching to location
+            endDate.value = '';   // Clear end date when switching to location
+          } else if (filterType.value === 'date_location') {
+            dateFields.style.display = '';
+            locationField.style.display = '';
+            startDate.required = true;
+            endDate.required = true;
+            locationId.required = true;
           }
         }
         filterType.addEventListener('change', updateFields);

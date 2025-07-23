@@ -327,10 +327,23 @@ class ReportsController extends Controller
     {
         $this->authorize('reports.view');
         $query = \App\Models\Actionlog::with('item', 'user', 'target', 'adminuser');
-        if ($request->input('filter_type') === 'date' && $request->filled('start_date') && $request->filled('end_date')) {
+        $filterType = $request->input('filter_type');
+        if ($filterType === 'date_location') {
+            if ($request->filled('location_id')) {
+                $query->where(function($q) use ($request) {
+                    $q->where('target_type', 'App\\Models\\Location')
+                      ->where('target_id', $request->input('location_id'));
+                    $q->orWhere('location_id', $request->input('location_id'));
+                });
+            }
+            if ($request->filled('start_date') && $request->filled('end_date')) {
+                $query->whereDate('created_at', '>=', $request->input('start_date'))
+                      ->whereDate('created_at', '<=', $request->input('end_date'));
+            }
+        } else if ($filterType === 'date' && $request->filled('start_date') && $request->filled('end_date')) {
             $query->whereDate('created_at', '>=', $request->input('start_date'))
                   ->whereDate('created_at', '<=', $request->input('end_date'));
-        } elseif ($request->input('filter_type') === 'location' && $request->filled('location_id')) {
+        } else if ($filterType === 'location' && $request->filled('location_id')) {
             $query->where(function($q) use ($request) {
                 $q->where('target_type', 'App\\Models\\Location')
                   ->where('target_id', $request->input('location_id'));
