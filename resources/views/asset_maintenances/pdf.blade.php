@@ -7,8 +7,8 @@
         body {  font-weight: 500;}
         h2, h4 { text-align: center; color: #00008B; font-weight: 600;}
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #333; padding: 4px; text-align: left; }
-        th { color: grey; }
+        th, td { border: 1px solid #333; padding: 4px; text-align: right; }
+        td { color: grey; }
         @page {
             margin: 2mm 12mm 2mm 12mm;}
     </style>
@@ -21,18 +21,15 @@
 
 </head>
 <body>
-    <h2>Asset Maintenance Report  <br>
-    تقرير صيانة الأصل </h2>
-    <h4>Maintenance #{{ $maintenance->id }}</h4>
+    <h2>تقرير صيانة قسم الدعم التقني </h2>
+    <h4>تقرير #{{ $maintenance->id }}</h4>
     <table>
         <tr>
-            <th>Title عنوان الصيانة</th>
-            <td>{{ $maintenance->title }}</td>
+            <th>{{ $maintenance->title }} </th>
+            <td> عنوان الصيانة </td>
         </tr>
         <tr>
-            <th>Asset الأصل</th>
-            <td>
-                @if($maintenance->asset)
+            <th>@if($maintenance->asset)
                     {{ $maintenance->asset->present()->fullName() }}
                     @if($maintenance->asset->assigned_type == 'App\Models\User' && $maintenance->asset->assigned_to)
                         @php
@@ -45,55 +42,53 @@
                     @endif
                 @else
                     -
-                @endif
-            </td>
+                @endif</th>
+            <td>   الأصل</td>
         </tr>
         <tr>
-            <th>Serial No. رقم التسلسل  </th>
-            <td>{{ $item_serial }}</td>
+            <th> {{ $item_serial }} </th>
+            <td>رقم التسلسل </td>
         </tr>
         <tr>
-            <th>Type  النوع</th>
-            <td>{{ $maintenance->asset_maintenance_type }}</td>
+            <th> {{ $maintenance->asset_maintenance_type }}</th>
+            <td>النوع</td>
         </tr>
         <tr>
-            <th>Supplier  المورد</th>
-            <td>{{ $maintenance->supplier->name }}</td>
+            <th> {{ $maintenance->supplier->name }}</th>
+            <td>المورد</td>
         </tr>
         <tr>
-            <th>Location الموقع</th>
-            <td> {{ $user->userloc->name }} </td>
+            <th> {{ $user->userloc->name }}</th>
+            <td> الموقع </td>
         </tr>
 
         <tr>
-            <th>Cost  التكلفة</th>
-            <td>{{ $maintenance->cost }}</td>
+            <th> {{ $maintenance->cost }} </th>
+            <td>التكلفة</td>
         </tr>
         <tr>
-            <th>Start Date تاريخ البدأ</th>
-            <td>{{ $maintenance->start_date }}</td>
+            <th>{{ $maintenance->start_date }} </th>
+            <td>تاريخ البدأ</td>
         </tr>
         <tr>
-            <th>Completion Date تاريخ الأنتهاء</th>
-            <td>{{ $maintenance->completion_date }}</td>
+            <th> {{ $maintenance->completion_date }}</th>
+            <td>تاريخ الأنتهاء</td>
         </tr>
         <tr>
-            <th>Repair Method طريقة التصليح</th>
-            <td>{{ $maintenance->repair_method }}</td>
+            <th> {{ $maintenance->repair_method }}</th>
+            <td>طريقة التصليح</td>
         </tr>
         <tr>
-            <th>Notes الملاحظات</th>
-            <td>{{ $maintenance->notes }}</td>
+            <th> {{ $maintenance->notes }}</th>
+            <td>الملاحظات</td>
         </tr>
    
         <tr>
-            <th>Maintenance Status حالة الصيانة</th>
-            <td>{{ $maintenanceStatus ?? '-' }}</td>
+            <th>{{ $maintenanceStatus ?? '-' }} </th>
+            <td>حالة الصيانة</td>
         </tr>
         <tr>
-            <th>Signature التوقيع</th>
-            <td>
-                @php
+            <th>@php
                     $acceptance = $maintenance->maintenanceAcceptances()
                         ->where('assigned_to_id', $maintenance->asset->assigned_to ?? null)
                         ->first();
@@ -105,13 +100,13 @@
                     <img src="{{ $signature }}" alt="Signature" style="max-width:350px;" />
                 @else
                     -
-                @endif
-            </td>
+                @endif </th>
+            <td>التوقيع</td>
         </tr>
     </table>
     <p style="margin-top:40px; text-align:center;">
-        Report Created by {{ $createdByName }}<br>
-        Generated on {{ date('Y-m-d H:i') }}
+        التقرير اعد من قبل {{ $createdByName }}<br>
+        بتاريخ {{ date('Y-m-d ') }}
     </p>
 </body>
 </html> 

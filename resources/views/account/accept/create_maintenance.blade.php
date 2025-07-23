@@ -39,6 +39,7 @@
                     <div class="col-md-12" style="padding-top: 20px;">
                         {{-- EULA or Maintenance Details --}}
                         <h4>Maintenance Details</h4>
+                        <br>
                         <table class="table table-striped">
                             <tr>
                                 <td><strong>Title:</strong></td>
@@ -59,10 +60,6 @@
                             <tr>
                                 <td><strong>Completion Date:</strong></td>
                                 <td>{{ $maintenanceAcceptance->maintenance->completion_date ? \App\Helpers\Helper::getFormattedDateObject($maintenanceAcceptance->maintenance->completion_date, 'date', false) : '-' }}</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Cost:</strong></td>
-                                <td>{{ $maintenanceAcceptance->maintenance->cost ? \App\Helpers\Helper::formatCurrencyOutput($maintenanceAcceptance->maintenance->cost) : '-' }}</td>
                             </tr>
                             <tr>
                                 <td><strong>Repair Method:</strong></td>
