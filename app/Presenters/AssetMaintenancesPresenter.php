@@ -120,6 +120,13 @@ class AssetMaintenancesPresenter extends Presenter
                 'title' => trans('general.signature'),
                 'formatter' => 'window.maintenanceSignatureFormatter',
                 'align' => 'center',
+            ],
+            [
+                'field' => 'acceptance_note',
+                'searchable' => true,
+                'sortable' => true,
+                'title' => 'Acceptance Note',
+                'visible' => true,
             ], [
                 'field' => 'is_warranty',
                 'searchable' => true,

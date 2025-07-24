@@ -32,6 +32,7 @@
                 <option value="all">All Displayed Maintenances</option>
                 <option value="created_at">By Created Date</option>
                 <option value="maintenance_date">By Maintenance Date</option>
+                <option value="declined">By Declined Maintenance</option>
               </select>
             </div>
             <div class="form-group" id="dateRangeFields" style="display:none;">
@@ -55,6 +56,8 @@
       var dateRangeFields = document.getElementById('dateRangeFields');
       var startDate = document.getElementById('start_date');
       var endDate = document.getElementById('end_date');
+      var reportForm = document.getElementById('reportForm');
+      var originalAction = reportForm.getAttribute('action');
       reportType.addEventListener('change', function() {
         if (reportType.value === 'created_at' || reportType.value === 'maintenance_date') {
           dateRangeFields.style.display = '';
@@ -64,6 +67,11 @@
           dateRangeFields.style.display = 'none';
           startDate.required = false;
           endDate.required = false;
+        }
+        if (reportType.value === 'declined') {
+          reportForm.setAttribute('action', '{{ route('maintenances.pdf.declined') }}');
+        } else {
+          reportForm.setAttribute('action', originalAction);
         }
       });
     });
@@ -77,30 +85,56 @@
   <div class="col-md-12">
     <div class="box box-default">
       <div class="box-body">
-
-          <table
-              data-columns="{{ \App\Presenters\AssetMaintenancesPresenter::dataTableLayout() }}"
-              data-cookie-id-table="maintenancesTable"
-
-
-
-
-              data-side-pagination="server"
-
-
-              data-show-footer="true"
-
-
-              id="maintenancesTable"
-              class="table table-striped snipe-table"
-              data-url="{{route('api.maintenances.index') }}"
-              data-export-options='{
-                "fileName": "export-maintenances-{{ date('Y-m-d') }}",
-                    "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
-              }'>
-
-        </table>
-
+        <div class="nav-tabs-custom">
+          <ul class="nav nav-tabs">
+            <li class="active">
+              <a href="#all_maintenances" data-toggle="tab">{{ trans('admin/asset_maintenances/general.asset_maintenances') }}</a>
+            </li>
+            <li>
+              <a href="#declined_maintenances" data-toggle="tab">Declined Maintenances</a>
+            </li>
+          </ul>
+          <div class="tab-content">
+            <div class="tab-pane active" id="all_maintenances">
+              <table
+                  data-columns="{{ \App\Presenters\AssetMaintenancesPresenter::dataTableLayout() }}"
+                  data-cookie-id-table="maintenancesTable"
+                  data-side-pagination="server"
+                  data-show-footer="true"
+                  id="maintenancesTable"
+                  class="table table-striped snipe-table"
+                  data-url="{{route('api.maintenances.index') }}"
+                  data-export-options='{
+                    "fileName": "export-maintenances-{{ date('Y-m-d') }}",
+                        "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
+                  }'>
+              </table>
+            </div>
+            <div class="tab-pane" id="declined_maintenances">
+              <table
+                  data-columns='@php
+                    $columns = json_decode(\App\Presenters\AssetMaintenancesPresenter::dataTableLayout(), true);
+                    foreach ($columns as &$col) {
+                      if ($col["field"] === "acceptance_note") {
+                        $col["title"] = "Decline Notes";
+                      }
+                    }
+                    echo json_encode($columns);
+                  @endphp'
+                  data-cookie-id-table="declinedMaintenancesTable"
+                  data-side-pagination="server"
+                  data-show-footer="true"
+                  id="declinedMaintenancesTable"
+                  class="table table-striped snipe-table"
+                  data-url="{{ route('api.maintenances.index', ['declined' => 1]) }}"
+                  data-export-options='{
+                    "fileName": "export-declined-maintenances-{{ date('Y-m-d') }}",
+                        "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
+                  }'>
+              </table>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

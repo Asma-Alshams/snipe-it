@@ -33,12 +33,23 @@ class AssetMaintenancesController extends Controller
     {
         $this->authorize('view', Asset::class);
 
-        $maintenances = AssetMaintenance::select('asset_maintenances.*')
-            ->with('asset', 'asset.model', 'asset.location', 'asset.defaultLoc', 'supplier', 'asset.company',  'asset.assetstatus', 'adminuser')
-            ->whereDoesntHave('maintenanceAcceptances', function($query) {
-                $query->where('assigned_to_id', auth()->id())
-                      ->whereNotNull('declined_at');
-            });
+        if ($request->input('declined') == 1) {
+            // Only maintenances where the current user's acceptance is declined
+            $maintenances = AssetMaintenance::select('asset_maintenances.*')
+                ->with('asset', 'asset.model', 'asset.location', 'asset.defaultLoc', 'supplier', 'asset.company',  'asset.assetstatus', 'adminuser')
+                ->whereHas('maintenanceAcceptances', function($query) {
+                    $query->where('assigned_to_id', auth()->id())
+                          ->whereNotNull('declined_at');
+                });
+        } else {
+            // Default: exclude maintenances declined by the current user
+            $maintenances = AssetMaintenance::select('asset_maintenances.*')
+                ->with('asset', 'asset.model', 'asset.location', 'asset.defaultLoc', 'supplier', 'asset.company',  'asset.assetstatus', 'adminuser')
+                ->whereDoesntHave('maintenanceAcceptances', function($query) {
+                    $query->where('assigned_to_id', auth()->id())
+                          ->whereNotNull('declined_at');
+                });
+        }
 
         if ($request->filled('search')) {
             $maintenances = $maintenances->TextSearch($request->input('search'));

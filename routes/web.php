@@ -586,6 +586,8 @@ Route::get('maintenances/{maintenance}/pdf', [App\Http\Controllers\AssetMaintena
 Route::get('maintenances/pdf/recent', [App\Http\Controllers\AssetMaintenancesController::class, 'exportAllRecentPdf'])
     ->name('maintenances.pdf.recent');
 
+Route::get('maintenances/pdf/declined', [App\Http\Controllers\AssetMaintenancesController::class, 'exportDeclinedPdf'])->name('maintenances.pdf.declined');
+
 
 Route::get(
     'auth/signin',

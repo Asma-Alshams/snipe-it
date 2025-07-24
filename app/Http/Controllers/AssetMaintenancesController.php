@@ -439,4 +439,76 @@ class AssetMaintenancesController extends Controller
             'Content-Disposition' => 'attachment; filename="' . $filename . '"'
         ]);
     }
+
+    /**
+     * Export declined asset maintenances as a PDF using the declined_pdf view.
+     */
+    public function exportDeclinedPdf(Request $request)
+    {
+        $this->authorize('view', Asset::class);
+        $maintenancesQuery = \App\Models\AssetMaintenance::with([
+            'asset',
+            'asset.assignedTo',
+            'asset.assetstatus',
+            'adminuser',
+        ])->whereHas('maintenanceAcceptances', function($query) {
+            $query->where('assigned_to_id', auth()->id())
+                  ->whereNotNull('declined_at');
+        });
+
+        // Filtering logic (optional: add date range if needed)
+        if ($request->filled('filter') && $request->filled('start_date') && $request->filled('end_date')) {
+            $start = $request->input('start_date');
+            $end = $request->input('end_date');
+            if ($request->input('filter') === 'created_at') {
+                $maintenancesQuery->whereDate('created_at', '>=', $start)
+                                  ->whereDate('created_at', '<=', $end);
+            } elseif ($request->input('filter') === 'maintenance_date') {
+                $maintenancesQuery->whereDate('start_date', '>=', $start)
+                                  ->whereDate('completion_date', '<=', $end);
+            }
+        }
+        $maintenances = $maintenancesQuery->orderBy('created_at', 'desc')->get();
+        // Add custom field values to each maintenance
+        foreach ($maintenances as $maintenance) {
+            if ($maintenance->asset) {
+                $maintenance->macAddress = $maintenance->asset->getAttribute('_snipeit_mac_address_1');
+                $maintenance->maintenanceStatus = $maintenance->asset->getAttribute('_snipeit_maintenance_status_2');
+                if ($maintenance->asset->assigned_type == 'App\\Models\\User' && $maintenance->asset->assigned_to) {
+                    $assignedUser = \App\Models\User::with('department')->find($maintenance->asset->assigned_to);
+                    $maintenance->assignedUser = $assignedUser;
+                } else {
+                    $maintenance->assignedUser = null;
+                }
+            } else {
+                $maintenance->macAddress = null;
+                $maintenance->maintenanceStatus = null;
+                $maintenance->assignedUser = null;
+            }
+        }
+        $branding_settings = \App\Http\Controllers\SettingsController::getPDFBranding();
+        $logo = '';
+        if (!is_null($branding_settings->acceptance_pdf_logo)) {
+            $logo = public_path() . '/uploads/' . $branding_settings->acceptance_pdf_logo;
+        } elseif (!is_null($branding_settings->logo)) {
+            $logo = public_path() . '/uploads/' . $branding_settings->logo;
+        }
+        $data = [
+            'maintenances' => $maintenances,
+            'logo' => $logo,
+            'filter' => $request->input('filter'),
+            'start_date' => $request->input('start_date'),
+            'end_date' => $request->input('end_date'),
+        ];
+        $html = view('asset_maintenances.declined_pdf', $data)->render();
+        $pdfContent = \Omaralalwi\Gpdf\Facade\Gpdf::generate($html, [
+            'mode' => 'utf-8',
+            'default_font' => 'dejavusans',
+        ]);
+        $filename = 'declined-maintenance-report-' . date('Y-m-d-his') . '.pdf';
+        return response($pdfContent, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"'
+        ]);
+    }
 }

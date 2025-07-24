@@ -24,12 +24,16 @@ class AssetMaintenancesTransformer
     {
         // Signature logic
         $signature = null;
+        $acceptance_note = null;
         if ($assetmaintenance->asset) {
             $acceptance = $assetmaintenance->maintenanceAcceptances()
                 ->where('assigned_to_id', $assetmaintenance->asset->assigned_to)
                 ->first();
-            if ($acceptance && $acceptance->signature_filename) {
-                $signature = asset('uploads/signatures/' . $acceptance->signature_filename);
+            if ($acceptance) {
+                if ($acceptance->signature_filename) {
+                    $signature = asset('uploads/signatures/' . $acceptance->signature_filename);
+                }
+                $acceptance_note = $acceptance->note;
             }
         }
 
@@ -92,6 +96,7 @@ class AssetMaintenancesTransformer
             'updated_at' => Helper::getFormattedDateObject($assetmaintenance->updated_at, 'datetime'),
             'is_warranty'=> $assetmaintenance->is_warranty,
             'signature' => $signature,
+            'acceptance_note' => $acceptance_note,
 
         ];
 
