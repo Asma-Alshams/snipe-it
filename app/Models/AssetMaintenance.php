@@ -55,6 +55,8 @@ class AssetMaintenance extends Model implements ICompanyableChild
         'notes',
         'repair_method',
         'cost',
+        // Used to group maintenances created in a department/batch action
+        'periodic_maintenance_id',
     ];
 
     use Searchable;

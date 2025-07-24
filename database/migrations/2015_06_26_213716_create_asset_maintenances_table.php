@@ -19,6 +19,7 @@
                       ->unsigned();
                 $table->integer('supplier_id')
                       ->unsigned();
+                $table->unsignedInteger('periodic_maintenance_id')->nullable()->default(null);
                 $table->string('asset_maintenance_type');
                 $table->string('title', 100);
                 $table->boolean('is_warranty');

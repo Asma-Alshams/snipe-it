@@ -10,6 +10,9 @@
 @section('header_right')
   @can('update', \App\Models\Asset::class)
     <a href="{{ route('maintenances.create') }}" class="btn btn-primary pull-right"> {{ trans('general.create') }}</a>
+    <button type="button" class="btn btn-success pull-right" style="margin-right:10px;" data-toggle="modal" data-target="#departmentMaintenanceModal">
+      <i class="fas fa-cogs"></i> Create Department Maintenance
+    </button>
   @endcan
   <button type="button" class="btn btn-primary pull-right text-white" style="margin-right:10px;" data-toggle="modal" data-target="#reportModal">
     <i class="fas fa-file-pdf"></i> Generate Report
@@ -33,6 +36,7 @@
                 <option value="created_at">By Created Date</option>
                 <option value="maintenance_date">By Maintenance Date</option>
                 <option value="declined">By Declined Maintenance</option>
+                <option value="department">By Department Maintenance</option>
               </select>
             </div>
             <div class="form-group" id="dateRangeFields" style="display:none;">
@@ -47,6 +51,85 @@
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
           <button type="submit" class="btn btn-primary" form="reportForm">Generate</button>
         </div>
+      </div>
+    </div>
+  </div>
+  <!-- Department Maintenance Modal -->
+  <div class="modal fade" id="departmentMaintenanceModal" tabindex="-1" role="dialog" aria-labelledby="departmentMaintenanceModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="departmentMaintenanceModalLabel">Create Maintenance for Department</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <form id="departmentMaintenanceForm" method="POST" action="{{ route('maintenances.department.confirm') }}">
+          @csrf
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="department_id">Department</label>
+              <select class="form-control" id="department_id" name="department_id" required>
+                <option value="">Select Department</option>
+                @foreach (\App\Models\Department::all() as $department)
+                  <option value="{{ $department->id }}">{{ $department->name }}</option>
+                @endforeach
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="title">Title</label>
+              <input type="text" class="form-control" name="title" id="title" required />
+            </div>
+            <div class="form-group">
+              <label for="asset_maintenance_type">Maintenance Type</label>
+              <select class="form-control" name="asset_maintenance_type" id="asset_maintenance_type" required>
+                @foreach (\App\Models\AssetMaintenance::getImprovementOptions() as $key => $value)
+                  <option value="{{ $key }}">{{ $value }}</option>
+                @endforeach
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="start_date">Start Date</label>
+              <input type="date" class="form-control" name="start_date" id="start_date" required />
+            </div>
+            <div class="form-group">
+              <label for="completion_date">Completion Date</label>
+              <input type="date" class="form-control" name="completion_date" id="completion_date" />
+            </div>
+            <div class="form-group">
+              <label for="supplier_id">Supplier (optional)</label>
+              <select class="form-control" name="supplier_id" id="supplier_id">
+                <option value="">Select Supplier</option>
+                @foreach (\App\Models\Supplier::all() as $supplier)
+                  <option value="{{ $supplier->id }}">{{ $supplier->name }}</option>
+                @endforeach
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="cost">Cost (optional)</label>
+              <input type="number" step="0.01" class="form-control" name="cost" id="cost" />
+            </div>
+            <div class="form-group">
+              <label for="notes">Notes (optional)</label>
+              <textarea class="form-control" name="notes" id="notes"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="repair_method">Repair Method (optional)</label>
+              <input type="text" class="form-control" name="repair_method" id="repair_method" />
+            </div>
+            <div class="form-group">
+              <label for="is_warranty">Warranty</label>
+              <select class="form-control" name="is_warranty" id="is_warranty">
+                <option value="0">No</option>
+                <option value="1">Yes</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-success">Next: Select Users/Assets</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>

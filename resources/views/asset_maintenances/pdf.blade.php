@@ -29,57 +29,58 @@
             <td> عنوان الصيانة </td>
         </tr>
         <tr>
-            <th>@if($maintenance->asset)
+            <th>
+                @if($maintenance->asset && $maintenance->asset->present())
                     {{ $maintenance->asset->present()->fullName() }}
-                    @if($maintenance->asset->assigned_type == 'App\Models\User' && $maintenance->asset->assigned_to)
+                    @if($maintenance->asset->assigned_type == 'App\\Models\\User' && $maintenance->asset->assigned_to)
                         @php
                             $assignedUser = \App\Models\User::find($maintenance->asset->assigned_to);
                         @endphp
                         @if($assignedUser)
                            -> {{ $assignedUser->present()->fullName() }}
-                           
                         @endif
                     @endif
                 @else
                     -
-                @endif</th>
+                @endif
+            </th>
             <td>   الأصل</td>
         </tr>
         <tr>
-            <th> {{ $item_serial }} </th>
+            <th> {{ $item_serial ?? '-' }} </th>
             <td>رقم التسلسل </td>
         </tr>
         <tr>
-            <th> {{ $maintenance->asset_maintenance_type }}</th>
+            <th> {{ $maintenance->asset_maintenance_type ?? '-' }}</th>
             <td>النوع</td>
         </tr>
         <tr>
-            <th> {{ $maintenance->supplier->name }}</th>
+            <th> {{ $maintenance->supplier && $maintenance->supplier->name ? $maintenance->supplier->name : '-' }}</th>
             <td>المورد</td>
         </tr>
         <tr>
-            <th> {{ $user->userloc->name }}</th>
+            <th> {{ $user && isset($user->userloc) && $user->userloc ? $user->userloc->name : '-' }}</th>
             <td> الموقع </td>
         </tr>
 
         <tr>
-            <th> {{ $maintenance->cost }} </th>
+            <th> {{ $maintenance->cost ?? '-' }} </th>
             <td>التكلفة</td>
         </tr>
         <tr>
-            <th>{{ $maintenance->start_date }} </th>
+            <th>{{ $maintenance->start_date ?? '-' }} </th>
             <td>تاريخ البدأ</td>
         </tr>
         <tr>
-            <th> {{ $maintenance->completion_date }}</th>
+            <th> {{ $maintenance->completion_date ?? '-' }}</th>
             <td>تاريخ الأنتهاء</td>
         </tr>
         <tr>
-            <th> {{ $maintenance->repair_method }}</th>
+            <th> {{ $maintenance->repair_method ?? '-' }}</th>
             <td>طريقة التصليح</td>
         </tr>
         <tr>
-            <th> {{ $maintenance->notes }}</th>
+            <th> {{ $maintenance->notes ?? '-' }}</th>
             <td>الملاحظات</td>
         </tr>
    

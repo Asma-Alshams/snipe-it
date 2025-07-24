@@ -457,13 +457,17 @@ class AssetMaintenancesController extends Controller
         });
 
         // Filtering logic (optional: add date range if needed)
-        if ($request->filled('filter') && $request->filled('start_date') && $request->filled('end_date')) {
-            $start = $request->input('start_date');
-            $end = $request->input('end_date');
-            if ($request->input('filter') === 'created_at') {
+        if ($request->filled('filter')) {
+            if ($request->input('filter') === 'department') {
+                $maintenancesQuery->whereNotNull('periodic_maintenance_id');
+            } elseif ($request->input('filter') === 'created_at' && $request->filled('start_date') && $request->filled('end_date')) {
+                $start = $request->input('start_date');
+                $end = $request->input('end_date');
                 $maintenancesQuery->whereDate('created_at', '>=', $start)
                                   ->whereDate('created_at', '<=', $end);
-            } elseif ($request->input('filter') === 'maintenance_date') {
+            } elseif ($request->input('filter') === 'maintenance_date' && $request->filled('start_date') && $request->filled('end_date')) {
+                $start = $request->input('start_date');
+                $end = $request->input('end_date');
                 $maintenancesQuery->whereDate('start_date', '>=', $start)
                                   ->whereDate('completion_date', '<=', $end);
             }
@@ -510,5 +514,132 @@ class AssetMaintenancesController extends Controller
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => 'attachment; filename="' . $filename . '"'
         ]);
+    }
+
+    /**
+     * Create maintenances for all assets of all users in a department
+     */
+    public function createForDepartment(Request $request) : RedirectResponse
+    {
+        $this->authorize('update', Asset::class);
+        $validated = $request->validate([
+            'department_id' => 'required|exists:departments,id',
+            'title' => 'required|string|max:100',
+            'asset_maintenance_type' => 'required|string',
+            'start_date' => 'required|date',
+            'completion_date' => 'nullable|date|after_or_equal:start_date',
+            'supplier_id' => 'nullable|integer|exists:suppliers,id',
+            'cost' => 'nullable|numeric',
+            'notes' => 'nullable|string',
+            'repair_method' => 'nullable|string',
+            'is_warranty' => 'nullable|boolean',
+        ]);
+
+        $department = \App\Models\Department::with('users.assets')->findOrFail($validated['department_id']);
+        $createdCount = 0;
+        foreach ($department->users as $user) {
+            foreach ($user->assets as $asset) {
+                $assetMaintenance = new AssetMaintenance();
+                $assetMaintenance->supplier_id = $validated['supplier_id'] ?? null;
+                $assetMaintenance->is_warranty = $validated['is_warranty'] ?? 0;
+                $assetMaintenance->cost = $validated['cost'] ?? null;
+                $assetMaintenance->notes = $validated['notes'] ?? null;
+                $assetMaintenance->repair_method = $validated['repair_method'] ?? null;
+                $assetMaintenance->asset_id = $asset->id;
+                $assetMaintenance->asset_maintenance_type = $validated['asset_maintenance_type'];
+                $assetMaintenance->title = $validated['title'];
+                $assetMaintenance->start_date = $validated['start_date'];
+                $assetMaintenance->completion_date = $validated['completion_date'] ?? null;
+                $assetMaintenance->created_by = auth()->id();
+                if (($assetMaintenance->completion_date !== null)
+                    && ($assetMaintenance->start_date !== '')
+                    && ($assetMaintenance->start_date !== '0000-00-00')
+                ) {
+                    $startDate = Carbon::parse($assetMaintenance->start_date);
+                    $completionDate = Carbon::parse($assetMaintenance->completion_date);
+                    $assetMaintenance->asset_maintenance_time = (int) $completionDate->diffInDays($startDate, true);
+                }
+                if ($assetMaintenance->save()) {
+                    $assetMaintenance->createAcceptanceRecord();
+                    $createdCount++;
+                }
+            }
+        }
+        return redirect()->route('maintenances.index')
+            ->with('success', $createdCount . ' maintenances created for department.');
+    }
+
+    /**
+     * Step 1: Show confirmation page for department maintenance creation
+     */
+    public function confirmDepartmentMaintenances(Request $request)
+    {
+        $validated = $request->validate([
+            'department_id' => 'required|exists:departments,id',
+            'title' => 'required|string|max:100',
+            'asset_maintenance_type' => 'required|string',
+            'start_date' => 'required|date',
+            'completion_date' => 'nullable|date|after_or_equal:start_date',
+            'supplier_id' => 'nullable|integer|exists:suppliers,id',
+            'cost' => 'nullable|numeric',
+            'notes' => 'nullable|string',
+            'repair_method' => 'nullable|string',
+            'is_warranty' => 'nullable|boolean',
+        ]);
+        $department = \App\Models\Department::with('users.assets')->findOrFail($validated['department_id']);
+        return view('asset_maintenances.confirm_department', [
+            'department' => $department,
+            'fields' => $validated,
+        ]);
+    }
+
+    /**
+     * Step 2: Finalize and create maintenances for selected users/assets
+     */
+    public function finalizeDepartmentMaintenances(Request $request)
+    {
+        $validated = $request->validate([
+            'user_asset' => 'required|array', // user_asset[user_id][] = asset_id
+            'title' => 'required|string|max:100',
+            'asset_maintenance_type' => 'required|string',
+            'start_date' => 'required|date',
+            'completion_date' => 'nullable|date|after_or_equal:start_date',
+            'supplier_id' => 'nullable|integer|exists:suppliers,id',
+            'cost' => 'nullable|numeric',
+            'notes' => 'nullable|string',
+            'repair_method' => 'nullable|string',
+            'is_warranty' => 'nullable|boolean',
+        ]);
+        $createdCount = 0;
+        foreach ($validated['user_asset'] as $user_id => $asset_ids) {
+            foreach ($asset_ids as $asset_id) {
+                $assetMaintenance = new \App\Models\AssetMaintenance();
+                $assetMaintenance->supplier_id = $validated['supplier_id'] ?? null;
+                $assetMaintenance->is_warranty = $validated['is_warranty'] ?? 0;
+                $assetMaintenance->cost = $validated['cost'] ?? null;
+                $assetMaintenance->notes = $validated['notes'] ?? null;
+                $assetMaintenance->repair_method = $validated['repair_method'] ?? null;
+                $assetMaintenance->asset_id = $asset_id;
+                $assetMaintenance->asset_maintenance_type = $validated['asset_maintenance_type'];
+                $assetMaintenance->title = $validated['title'];
+                $assetMaintenance->start_date = $validated['start_date'];
+                $assetMaintenance->completion_date = $validated['completion_date'] ?? null;
+                $assetMaintenance->created_by = auth()->id();
+                if (($assetMaintenance->completion_date !== null)
+                    && ($assetMaintenance->start_date !== '')
+                    && ($assetMaintenance->start_date !== '0000-00-00')
+                ) {
+                    $startDate = \Carbon\Carbon::parse($assetMaintenance->start_date);
+                    $completionDate = \Carbon\Carbon::parse($assetMaintenance->completion_date);
+                    $assetMaintenance->asset_maintenance_time = (int) $completionDate->diffInDays($startDate, true);
+                }
+                if ($assetMaintenance->save()) {
+                    $assetMaintenance->createAcceptanceRecord();
+                    $createdCount++;
+                }
+            }
+        }
+        return redirect()->route('maintenances.index')
+            ->with('success', $createdCount . ' maintenances created for department.');
     }
 }

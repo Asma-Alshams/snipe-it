@@ -588,6 +588,10 @@ Route::get('maintenances/pdf/recent', [App\Http\Controllers\AssetMaintenancesCon
 
 Route::get('maintenances/pdf/declined', [App\Http\Controllers\AssetMaintenancesController::class, 'exportDeclinedPdf'])->name('maintenances.pdf.declined');
 
+Route::post('maintenances/department', [App\Http\Controllers\AssetMaintenancesController::class, 'createForDepartment'])->name('maintenances.department');
+Route::post('maintenances/department/confirm', [App\Http\Controllers\AssetMaintenancesController::class, 'confirmDepartmentMaintenances'])->name('maintenances.department.confirm');
+Route::post('maintenances/department/finalize', [App\Http\Controllers\AssetMaintenancesController::class, 'finalizeDepartmentMaintenances'])->name('maintenances.department.finalize');
+
 
 Route::get(
     'auth/signin',
