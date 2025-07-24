@@ -30,14 +30,13 @@
         </tr>
         <tr>
             <th>
-                @if($maintenance->asset && $maintenance->asset->present())
-                    {{ $maintenance->asset->present()->fullName() }}
-                    @if($maintenance->asset->assigned_type == 'App\\Models\\User' && $maintenance->asset->assigned_to)
+                @if($maintenance->asset)
+                    {{ $maintenance->asset->name ?? '-' }}<br> ({{ $maintenance->asset->asset_tag ?? '-' }}) {{ $maintenance->asset->model->name ?? '-' }}@if($maintenance->asset->assigned_type == 'App\\Models\\User' && $maintenance->asset->assigned_to)
                         @php
                             $assignedUser = \App\Models\User::find($maintenance->asset->assigned_to);
                         @endphp
                         @if($assignedUser)
-                           -> {{ $assignedUser->present()->fullName() }}
+                          -> {{ $assignedUser->present()->fullName() }}
                         @endif
                     @endif
                 @else

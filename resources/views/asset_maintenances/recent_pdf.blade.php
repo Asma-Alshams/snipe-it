@@ -56,7 +56,7 @@
                                 : null;
                         @endphp
                         @if($signature)
-                            <img src="{{ $signature }}" alt="Signature" style="max-width:200px;" />
+                            <img src="{{ $signature }}" alt="Signature" style="max-width:150px;" />
                         @else
                             -
                         @endif
@@ -79,12 +79,14 @@
                         @endif
                     </td>
                     <td>
-                        @if($m->asset && method_exists($m->asset, 'present') && $m->asset->present())
-                            {{ $m->asset->present()->fullName() }}
+                        @if($m->asset)
+                            {{ $m->asset->name ?? '-' }} <br> ({{ $m->asset->asset_tag ?? '-' }}) {{ $m->asset->model->name ?? '-' }}@if($m->assignedUser)
+                              <br>  -> {{ method_exists($m->assignedUser, 'present') && $m->assignedUser->present() ? $m->assignedUser->present()->fullName() : trim(($m->assignedUser->first_name ?? '') . ' ' . ($m->assignedUser->last_name ?? '')) }}
+                            @endif
                         @else
                             -
                         @endif
-                     </td>
+                    </td>
                     <td>{{ $m->assignedUser && $m->assignedUser->department ? $m->assignedUser->department->name : '-' }}</td>
                     <td>{{ $m->id }}</td>
                 </tr>

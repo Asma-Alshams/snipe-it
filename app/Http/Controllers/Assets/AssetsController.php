@@ -32,6 +32,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use TypeError;
+use Omaralalwi\Gpdf\Facade\Gpdf as GpdfFacade;
 
 /**
  * This class controls all actions related to assets for
