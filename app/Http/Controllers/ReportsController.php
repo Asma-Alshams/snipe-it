@@ -234,6 +234,7 @@ class ReportsController extends Controller
         ini_set('max_execution_time', 12000);
         $this->authorize('reports.view');
 
+
         \Debugbar::disable();
         $response = new StreamedResponse(function () {
             Log::debug('Starting streamed response');
@@ -359,6 +360,7 @@ class ReportsController extends Controller
                 'action' => $log->present()->actionType(),
                 'item' => $log->item ? $log->item->getDisplayNameAttribute() : '',
                 'target' => $log->target ? ($log->targetType() == 'user' ? $log->target->getFullNameAttribute() : $log->target->getDisplayNameAttribute()) : '',
+                'note' => $log->note ?? '',
             ];
         }
         $branding_settings = \App\Http\Controllers\SettingsController::getPDFBranding();

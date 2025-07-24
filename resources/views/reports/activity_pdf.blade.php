@@ -28,6 +28,7 @@
     <table>
         <thead>
             <tr>
+                <th>ملاحظات</th>
                 <th>الهدف</th>
                 <th>العنصر</th>
                 <th>العملية</th>
@@ -37,15 +38,17 @@
         </thead>
         <tbody>
             @forelse($rows as $row)
-                <tr>
+                <tr> 
+                    <td>{{ $row['note'] ?? '' }}</td>
                     <td>{{ $row['target'] }}</td>
                     <td>{{ $row['item'] }}</td>
                     <td>{{ $row['action'] }}</td>
                     <td>{{ $row['created_by'] }}</td>
                     <td>{{ $row['date'] }}</td>
+                  
                 </tr>
             @empty
-                <tr><td colspan="5" style="text-align:center;">No activity found for this period.</td></tr>
+                <tr><td colspan="6" style="text-align:center;">No activity found for this period.</td></tr>
             @endforelse
         </tbody>
     </table>

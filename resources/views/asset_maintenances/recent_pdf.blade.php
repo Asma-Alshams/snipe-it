@@ -22,9 +22,9 @@
     <h2>قائمة الصيانة الدورية للأصول </h2>
     @if(isset($filter) && $start_date && $end_date)
         @if($filter === 'created_at')
-            <p style="text-align:center;">Created At: from {{ $start_date }} to {{ $end_date }}</p>
+            <p style="text-align:center;">اعد التقرير من: {{ $start_date }} الى {{ $end_date }}</p>
         @elseif($filter === 'maintenance_date')
-            <p style="text-align:center;">Maintenance date: from {{ $start_date }} to {{ $end_date }}</p>
+            <p style="text-align:center;">تاريخ الصيانة من: {{ $start_date }} الى {{ $end_date }}</p>
         @endif
     @endif
     <table>
@@ -92,7 +92,7 @@
         </tbody>
     </table>
     <p style="margin-top:40px; text-align:center;">
-        Generated on {{ date('Y-m-d H:i') }}
+       تاريخ {{ date('Y-m-d H:i') }}
     </p>
 </body>
 </html> 
