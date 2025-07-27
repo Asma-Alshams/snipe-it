@@ -31,13 +31,13 @@
         <tr>
             <th>
                 @if($maintenance->asset)
-                    {{ $maintenance->asset->name ?? '-' }}<br> ({{ $maintenance->asset->asset_tag ?? '-' }}) {{ $maintenance->asset->model->name ?? '-' }}@if($maintenance->asset->assigned_type == 'App\\Models\\User' && $maintenance->asset->assigned_to)
-                        @php
-                            $assignedUser = \App\Models\User::find($maintenance->asset->assigned_to);
-                        @endphp
-                        @if($assignedUser)
-                          -> {{ $assignedUser->present()->fullName() }}
-                        @endif
+                    {{ $maintenance->asset->name ?? '-' }}<br> ({{ $maintenance->asset->asset_tag ?? '-' }}) {{ $maintenance->asset->model->name ?? '-' }}
+                    @php
+                        $acceptance = $maintenance->maintenanceAcceptances->first();
+                        $originalUser = $acceptance ? \App\Models\User::find($acceptance->assigned_to_id) : null;
+                    @endphp
+                    @if($originalUser)
+                      -> {{ $originalUser->present()->fullName() }}
                     @endif
                 @else
                     -
@@ -79,7 +79,18 @@
             <td>طريقة التصليح</td>
         </tr>
         <tr>
-            <th> {{ $maintenance->notes ?? '-' }}</th>
+            <th> {{ ucfirst($maintenance->risk_level ?? '-') }}</th>
+            <td>مستوى الخطر</td>
+        </tr>
+        <tr>
+            <th> {{ $maintenanceStatus ?? '-' }}</th>
+            <td>حالة الصيانة</td>
+        </tr>
+        <tr>
+            <th> @php
+                            $acceptance = $maintenance->maintenanceAcceptances->first();
+                        @endphp
+                        {{ $acceptance->note ?? '-' }}</th>
             <td>الملاحظات</td>
         </tr>
    
@@ -89,9 +100,7 @@
         </tr>
         <tr>
             <th>@php
-                    $acceptance = $maintenance->maintenanceAcceptances()
-                        ->where('assigned_to_id', $maintenance->asset->assigned_to ?? null)
-                        ->first();
+                    $acceptance = $maintenance->maintenanceAcceptances->first();
                     $signature = $acceptance && $acceptance->signature_filename
                         ? asset('uploads/signatures/' . $acceptance->signature_filename)
                         : null;

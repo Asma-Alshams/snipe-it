@@ -114,6 +114,21 @@
 
 
         @include ('partials.forms.edit.maintenance_type')
+        
+        <!-- Risk Level -->
+        <div class="form-group {{ $errors->has('risk_level') ? ' has-error' : '' }}">
+          <label for="risk_level" class="col-md-3 control-label">Risk Level</label>
+          <div class="col-md-4">
+            <select class="form-control" name="risk_level" id="risk_level">
+              <option value="">Select Risk Level</option>
+              <option value="low" {{ old('risk_level', $item->risk_level) == 'low' ? 'selected' : '' }}>Low</option>
+              <option value="medium" {{ old('risk_level', $item->risk_level) == 'medium' ? 'selected' : '' }}>Medium</option>
+              <option value="high" {{ old('risk_level', $item->risk_level) == 'high' ? 'selected' : '' }}>High</option>
+            </select>
+            {!! $errors->first('risk_level', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+          </div>
+        </div>
+        
         @include ('partials.forms.edit.supplier-select', ['translated_name' => trans('general.supplier'), 'fieldname' => 'supplier_id'])
 
 

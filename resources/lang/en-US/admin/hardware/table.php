@@ -29,4 +29,5 @@ return [
     'requested_date' => 'Requested Date',
     'changed'       => 'Changed',
     'icon' => 'Icon',
+    'maintenance_status' => 'Maintenance Status',
 ];

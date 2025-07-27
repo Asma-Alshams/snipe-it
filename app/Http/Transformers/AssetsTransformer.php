@@ -103,6 +103,7 @@ class AssetsTransformer
             'requests_counter' => (int) $asset->requests_counter,
             'user_can_checkout' => (bool) $asset->availableForCheckout(),
             'book_value' => Helper::formatCurrencyOutput($asset->getDepreciatedValue()),
+            'maintenance_status' => $asset->getLatestMaintenanceStatus(),
         ];
 
 

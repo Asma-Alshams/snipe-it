@@ -69,7 +69,7 @@
         <td class="label">  الاسم   </td>  
     </tr>
     <tr>
-        <td> {{ $user->jobtitle }} </td>
+        <td> {{ $user->jobtitle ?? '' }} </td>
         <td> {{$assigned_to}} </td>
     </tr>
     <tr>
@@ -77,8 +77,8 @@
         <td class="label">   الرقم الوظيفي  </td>
     </tr>
     <tr>
-        <td> {{ $user->department->name }} </td>
-        <td>{{ $user->employee_num }} </td>
+        <td> {{ $user->department->name ?? '' }} </td>
+        <td>{{ $user->employee_num ?? '' }} </td>
     </tr>
     <tr>
         <td class="label">   تاريخ الطلب   </td>
@@ -86,7 +86,7 @@
     </tr>
     <tr>
         <td>   {{ date($date_settings) }} </td>
-        <td> {{ $user->userloc->name }} </td>
+        <td> {{ $user->userloc->name ?? '' }} </td>
     </tr>
     <tr>
         <td class="label"> تاريخ المتوقع تسليمه </td>
@@ -106,15 +106,15 @@
     </tr>
     <tr>
         <td>{{ $asset->model->manufacturer->name ?? '' }} </td>
-        <td> {{ $item_model }}</td>
+        <td> {{ $asset->name ?? '' }}  ({{ $item_model ?? '' }}) </td>
     </tr>
     <tr>
         <td class="label"> رقم التسلسل   </td>
         <td class="label">   علامة الاصل  </td>
     </tr>
     <tr>
-        <td>{{ $item_serial }}</td>
-        <td>  {{ $item_tag }}  </td>
+        <td>{{ $item_serial ?? '' }}</td>
+        <td>  {{ $item_tag ?? '' }}  </td>
     </tr> 
         <td class="label">الملحقات</td>
         <td class="label">تاريخ الشراء</td>

@@ -162,6 +162,17 @@ use Carbon\Carbon;
             </div> <!-- /row -->
             @endif
 
+            @if ($assetMaintenance->risk_level)
+            <div class="row">
+              <div class="col-md-3">
+                Risk Level
+              </div>
+              <div class="col-md-9">
+                {{ ucfirst($assetMaintenance->risk_level) }}
+              </div>
+            </div> <!-- /row -->
+            @endif
+
 
           </div><!-- /row-new-striped -->
       </div><!-- /box-body -->

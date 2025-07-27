@@ -19,20 +19,19 @@
     @endif
 </head>
 <body>
-    <h2>قائمة الصيانةالمرفوضة</h2>
+    <h2>قائمة الصيانة المرفوضة</h2>
     @if(isset($filter) && $start_date && $end_date)
-        @if($filter === 'created_at')
-            <p style="text-align:center;">اعد التقرير من: {{ $start_date }} الى {{ $end_date }}</p>
-        @elseif($filter === 'maintenance_date')
-            <p style="text-align:center;">تاريخ الصيانة من: {{ $start_date }} الى {{ $end_date }}</p>
+        @if($filter === 'declined')
+            <p style="text-align:center;">من: {{ $start_date }} الى {{ $end_date }}</p>
         @endif
     @endif
     <table>
         <thead>
             <tr>
                 <th>التوقيع</th>
-                 <th>ملاحظات الرفض</th>
-        
+                <th>ملاحظات الرفض</th>
+                <th>Risk Level</th>
+                <th>Maintenance Status</th>
                 <th>الصيانة نوع</th>
                 <th> اعد<br>من قبل</th>
                 <th>ل مخصص</th>
@@ -47,7 +46,7 @@
                 <tr>
                     <td>
                         @php
-                            $acceptance = $m->maintenanceAcceptances->where('assigned_to_id', $m->asset->assigned_to ?? null)->first();
+                            $acceptance = $m->maintenanceAcceptances->first();
                             $signature = $acceptance && $acceptance->signature_filename
                                 ? asset('uploads/signatures/' . $acceptance->signature_filename)
                                 : null;
@@ -60,20 +59,26 @@
                     </td>
                     <td>
                         @php
-                            $acceptance = $m->maintenanceAcceptances->where('assigned_to_id', $m->asset->assigned_to ?? null)->first();
+                            $acceptance = $m->maintenanceAcceptances->first();
                         @endphp
                         {{ $acceptance->note ?? '-' }}
                     </td>
+                    <td>{{ ucfirst($m->risk_level ?? '-') }}</td>
+                    <td>{{ $m->maintenanceStatus ?? '-' }}</td>
                     
                     <td>{{ $m->asset_maintenance_type ?? '-' }}</td>
                     <td>{{ $m->adminuser ? $m->adminuser->present()->name() : '-' }}</td>
                    
                     <td>
-                        @if($m->assignedUser)
-                            @if(method_exists($m->assignedUser, 'present') && $m->assignedUser->present())
-                                {{ $m->assignedUser->present()->fullName() }}
+                        @php
+                            $acceptance = $m->maintenanceAcceptances->first();
+                            $originalUser = $acceptance ? \App\Models\User::find($acceptance->assigned_to_id) : null;
+                        @endphp
+                        @if($originalUser)
+                            @if(method_exists($originalUser, 'present') && $originalUser->present())
+                                {{ $originalUser->present()->fullName() }}
                             @else
-                                {{ trim(($m->assignedUser->first_name ?? '') . ' ' . ($m->assignedUser->last_name ?? '')) }}
+                                {{ trim(($originalUser->first_name ?? '') . ' ' . ($originalUser->last_name ?? '')) }}
                             @endif
                         @else
                             -
@@ -88,7 +93,7 @@
                             -
                         @endif
                      </td>
-                    <td>{{ $m->assignedUser && $m->assignedUser->department ? $m->assignedUser->department->name : '-' }}</td>
+                    <td>{{ $originalUser && $originalUser->department ? $originalUser->department->name : '-' }}</td>
                     <td>{{ $m->id }}</td>
                     
                 </tr>

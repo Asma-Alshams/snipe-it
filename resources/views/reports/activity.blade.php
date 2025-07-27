@@ -36,6 +36,7 @@
                   <option value="date">Created By Date</option>
                   <option value="location">Location (Target)</option>
                   <option value="date_location">Date and Location</option>
+                  <option value="date_department">Date and Department</option>
                 </select>
               </div>
               <div id="dateFields">
@@ -59,6 +60,17 @@
                   </select>
                 </div>
               </div>
+              <div id="departmentField" style="display:none;">
+                <div class="form-group">
+                  <label for="department_id">Department</label>
+                  <select class="form-control" name="department_id" id="department_id">
+                    <option value="">-- Select Department --</option>
+                    @foreach(\App\Models\Department::orderBy('name')->get() as $department)
+                      <option value="{{ $department->id }}">{{ $department->name }}</option>
+                    @endforeach
+                  </select>
+                </div>
+              </div>
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -73,31 +85,51 @@
         var filterType = document.getElementById('filterType');
         var dateFields = document.getElementById('dateFields');
         var locationField = document.getElementById('locationField');
+        var departmentField = document.getElementById('departmentField');
         var startDate = document.getElementById('start_date');
         var endDate = document.getElementById('end_date');
         var locationId = document.getElementById('location_id');
+        var departmentId = document.getElementById('department_id');
         function updateFields() {
           if (filterType.value === 'date') {
             dateFields.style.display = '';
             locationField.style.display = 'none';
+            departmentField.style.display = 'none';
             startDate.required = true;
             endDate.required = true;
             locationId.required = false;
+            departmentId.required = false;
             locationId.value = ''; // Clear location when switching to date
+            departmentId.value = ''; // Clear department when switching to date
           } else if (filterType.value === 'location') {
             dateFields.style.display = 'none';
             locationField.style.display = '';
+            departmentField.style.display = 'none';
             startDate.required = false;
             endDate.required = false;
             locationId.required = true;
+            departmentId.required = false;
             startDate.value = ''; // Clear start date when switching to location
             endDate.value = '';   // Clear end date when switching to location
+            departmentId.value = ''; // Clear department when switching to location
           } else if (filterType.value === 'date_location') {
             dateFields.style.display = '';
             locationField.style.display = '';
+            departmentField.style.display = 'none';
             startDate.required = true;
             endDate.required = true;
             locationId.required = true;
+            departmentId.required = false;
+            departmentId.value = ''; // Clear department when switching to date_location
+          } else if (filterType.value === 'date_department') {
+            dateFields.style.display = '';
+            locationField.style.display = 'none';
+            departmentField.style.display = '';
+            startDate.required = true;
+            endDate.required = true;
+            locationId.required = false;
+            departmentId.required = true;
+            locationId.value = ''; // Clear location when switching to date_department
           }
         }
         filterType.addEventListener('change', updateFields);

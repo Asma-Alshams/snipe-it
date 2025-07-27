@@ -112,6 +112,18 @@ class AssetMaintenancesPresenter extends Presenter
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('admin/asset_maintenances/form.repair_method'),
+            ], [
+                'field' => 'risk_level',
+                'searchable' => true,
+                'sortable' => true,
+                'title' => 'Risk Level',
+                'formatter' => 'riskLevelFormatter',
+            ], [
+                'field' => 'maintenance_status',
+                'searchable' => true,
+                'sortable' => true,
+                'title' => 'Maintenance Status',
+                'formatter' => 'maintenanceStatusFormatter',
             ],
             [
                 'field' => 'signature',

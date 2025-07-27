@@ -11,7 +11,7 @@
   @can('update', \App\Models\Asset::class)
     <a href="{{ route('maintenances.create') }}" class="btn btn-primary pull-right"> {{ trans('general.create') }}</a>
     <button type="button" class="btn btn-success pull-right" style="margin-right:10px;" data-toggle="modal" data-target="#departmentMaintenanceModal">
-      <i class="fas fa-cogs"></i> Create Department Maintenance
+      <i class="fas fa-cogs"></i> Create Periodic Maintenance
     </button>
   @endcan
   <button type="button" class="btn btn-primary pull-right text-white" style="margin-right:10px;" data-toggle="modal" data-target="#reportModal">
@@ -21,29 +21,30 @@
   <div class="modal fade" id="reportModal" tabindex="-1" role="dialog" aria-labelledby="reportModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="reportModalLabel">Generate Maintenance Report</h5>
+        <div class="modal-header"> 
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
+          <h4 class="modal-title" id="reportModalLabel">Generate Maintenance Report</h4>
         </div>
         <div class="modal-body">
           <form id="reportForm" method="GET" action="{{ route('maintenances.pdf.recent') }}">
+            <div class="form-group">
+              <label for="start_date">Start Date</label>
+              <input type="date" class="form-control" name="start_date" id="start_date" required>
+            </div>
+            <div class="form-group">
+              <label for="end_date">End Date</label>
+              <input type="date" class="form-control" name="end_date" id="end_date" required>
+            </div>
             <div class="form-group">
               <label for="reportType">Report Type</label>
               <select class="form-control" id="reportType" name="filter">
                 <option value="all">All Displayed Maintenances</option>
                 <option value="created_at">By Created Date</option>
-                <option value="maintenance_date">By Maintenance Date</option>
                 <option value="declined">By Declined Maintenance</option>
-                <option value="department">By Department Maintenance</option>
+                <option value="department">By Periodic Maintenance</option>
               </select>
-            </div>
-            <div class="form-group" id="dateRangeFields" style="display:none;">
-              <label for="start_date">Start Date</label>
-              <input type="date" class="form-control" name="start_date" id="start_date">
-              <label for="end_date">End Date</label>
-              <input type="date" class="form-control" name="end_date" id="end_date">
             </div>
           </form>
         </div>
@@ -59,10 +60,10 @@
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="departmentMaintenanceModalLabel">Create Maintenance for Department</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
+          <h4 class="modal-title" id="departmentMaintenanceModalLabel">Create Periodic Maintenance for Department</h4>
         </div>
         <form id="departmentMaintenanceForm" method="POST" action="{{ route('maintenances.department.confirm') }}">
           @csrf
@@ -86,6 +87,15 @@
                 @foreach (\App\Models\AssetMaintenance::getImprovementOptions() as $key => $value)
                   <option value="{{ $key }}">{{ $value }}</option>
                 @endforeach
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="risk_level">Risk Level</label>
+              <select class="form-control" name="risk_level" id="risk_level">
+                <option value="">Select Risk Level</option>
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
               </select>
             </div>
             <div class="form-group">
@@ -136,27 +146,51 @@
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       var reportType = document.getElementById('reportType');
-      var dateRangeFields = document.getElementById('dateRangeFields');
       var startDate = document.getElementById('start_date');
       var endDate = document.getElementById('end_date');
       var reportForm = document.getElementById('reportForm');
       var originalAction = reportForm.getAttribute('action');
+      
       reportType.addEventListener('change', function() {
-        if (reportType.value === 'created_at' || reportType.value === 'maintenance_date') {
-          dateRangeFields.style.display = '';
-          startDate.required = true;
-          endDate.required = true;
-        } else {
-          dateRangeFields.style.display = 'none';
-          startDate.required = false;
-          endDate.required = false;
-        }
-        if (reportType.value === 'declined') {
+        updateFormAction();
+      });
+      
+      startDate.addEventListener('change', function() {
+        updateFormAction();
+      });
+      
+      endDate.addEventListener('change', function() {
+        updateFormAction();
+      });
+      
+      function updateFormAction() {
+        var selectedType = reportType.value;
+        var start = startDate.value;
+        var end = endDate.value;
+        
+        // Set the appropriate action based on report type
+        if (selectedType === 'declined') {
           reportForm.setAttribute('action', '{{ route('maintenances.pdf.declined') }}');
         } else {
+          // Use main route for all other types including department
           reportForm.setAttribute('action', originalAction);
         }
-      });
+        
+        // Ensure date parameters are always included in the form
+        var startDateInput = reportForm.querySelector('input[name="start_date"]');
+        var endDateInput = reportForm.querySelector('input[name="end_date"]');
+        var filterInput = reportForm.querySelector('select[name="filter"]');
+        
+        if (startDateInput) {
+          startDateInput.value = start;
+        }
+        if (endDateInput) {
+          endDateInput.value = end;
+        }
+        if (filterInput) {
+          filterInput.value = selectedType;
+        }
+      }
     });
   </script>
 @stop
@@ -230,6 +264,63 @@
 window.maintenanceSignatureFormatter = function(value, row) {
     if (value) {
         return '<img src="' + value + '" alt="Signature" style="max-width:200px;" />';
+    } else {
+        return '<span class="text-muted">-</span>';
+    }
+};
+
+window.riskLevelFormatter = function(value, row) {
+    if (value) {
+        var badgeClass = '';
+        switch(value.toLowerCase()) {
+            case 'high':
+                badgeClass = 'badge-danger';
+                break;
+            case 'medium':
+                badgeClass = 'badge-warning';
+                break;
+            case 'low':
+                badgeClass = 'badge-success';
+                break;
+            default:
+                badgeClass = 'badge-secondary';
+        }
+        return '<span class="badge ' + badgeClass + '">' + value.charAt(0).toUpperCase() + value.slice(1) + '</span>';
+    } else {
+        return '<span class="text-muted">-</span>';
+    }
+};
+
+window.maintenanceStatusFormatter = function(value, row) {
+    if (value) {
+        var badgeClass = '';
+        var statusText = '';
+        switch(value.toLowerCase()) {
+            case 'completed':
+                badgeClass = 'badge-success';
+                statusText = 'Completed';
+                break;
+            case 'under_maintenance':
+                badgeClass = 'badge-info';
+                statusText = 'Under Maintenance';
+                break;
+            case 'pending':
+                badgeClass = 'badge-warning';
+                statusText = 'Pending';
+                break;
+            case 'declined':
+                badgeClass = 'badge-danger';
+                statusText = 'Declined';
+                break;
+            case 'in_progress':
+                badgeClass = 'badge-primary';
+                statusText = 'In Progress';
+                break;
+            default:
+                badgeClass = 'badge-secondary';
+                statusText = value.charAt(0).toUpperCase() + value.slice(1);
+        }
+        return '<span class="badge ' + badgeClass + '">' + statusText + '</span>';
     } else {
         return '<span class="text-muted">-</span>';
     }

@@ -26,9 +26,7 @@ class AssetMaintenancesTransformer
         $signature = null;
         $acceptance_note = null;
         if ($assetmaintenance->asset) {
-            $acceptance = $assetmaintenance->maintenanceAcceptances()
-                ->where('assigned_to_id', $assetmaintenance->asset->assigned_to)
-                ->first();
+            $acceptance = $assetmaintenance->maintenanceAcceptances()->first();
             if ($acceptance) {
                 if ($acceptance->signature_filename) {
                     $signature = asset('uploads/signatures/' . $acceptance->signature_filename);
@@ -75,6 +73,8 @@ class AssetMaintenancesTransformer
             ] : null,
             'notes'         => ($assetmaintenance->notes) ? Helper::parseEscapedMarkedownInline($assetmaintenance->notes) : null,
             'repair_method' => ($assetmaintenance->repair_method) ? Helper::parseEscapedMarkedownInline($assetmaintenance->repair_method) : null,
+            'risk_level' => ($assetmaintenance->risk_level) ? e($assetmaintenance->risk_level) : null,
+            'maintenance_status' => self::getMaintenanceStatus($assetmaintenance),
             'supplier'      => ($assetmaintenance->supplier) ?  [
                     'id' => $assetmaintenance->supplier->id,
                     'name'=> e($assetmaintenance->supplier->name)
@@ -108,5 +108,45 @@ class AssetMaintenancesTransformer
         $array += $permissions_array;
 
         return $array;
+    }
+
+    /**
+     * Get the maintenance status based on completion and acceptance
+     *
+     * @param AssetMaintenance $assetmaintenance
+     * @return string
+     */
+    public static function getMaintenanceStatus(AssetMaintenance $assetmaintenance)
+    {
+        // Check if maintenance is declined (highest priority)
+        $acceptance = $assetmaintenance->maintenanceAcceptances()->first();
+        if ($acceptance && $acceptance->declined_at) {
+            return 'declined';
+        }
+
+        // Check if maintenance is completed (only if accepted and past completion date)
+        if ($assetmaintenance->completion_date && now()->isAfter($assetmaintenance->completion_date)) {
+            // If accepted and past completion date, mark as completed
+            if ($acceptance && $acceptance->accepted_at) {
+                return 'completed';
+            }
+            // If not accepted and not declined and past completion date, keep as pending
+            if (!$acceptance || $acceptance->isPending()) {
+                return 'pending';
+            }
+        }
+
+        // Check if maintenance is accepted
+        if ($acceptance && $acceptance->accepted_at) {
+            return 'under_maintenance';
+        }
+
+        // Check if maintenance is pending acceptance
+        if ($acceptance && $acceptance->isPending()) {
+            return 'pending';
+        }
+
+        // Default: in progress
+        return 'in_progress';
     }
 }

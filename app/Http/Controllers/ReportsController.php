@@ -350,6 +350,16 @@ class ReportsController extends Controller
                   ->where('target_id', $request->input('location_id'));
                 $q->orWhere('location_id', $request->input('location_id'));
             });
+        } else if ($filterType === 'date_department') {
+            if ($request->filled('department_id')) {
+                $query->whereHas('adminuser', function($q) use ($request) {
+                    $q->where('department_id', $request->input('department_id'));
+                });
+            }
+            if ($request->filled('start_date') && $request->filled('end_date')) {
+                $query->whereDate('created_at', '>=', $request->input('start_date'))
+                      ->whereDate('created_at', '<=', $request->input('end_date'));
+            }
         }
         $logs = $query->orderBy('created_at', 'desc')->get();
         $rows = [];
@@ -375,6 +385,7 @@ class ReportsController extends Controller
             'start_date' => $request->input('start_date'),
             'end_date' => $request->input('end_date'),
             'location' => $request->input('location_id') ? \App\Models\Location::find($request->input('location_id')) : null,
+            'department' => $request->input('department_id') ? \App\Models\Department::find($request->input('department_id')) : null,
             'logo' => $logo,
         ])->render();
         $pdfContent = GpdfFacade::generate($html);

@@ -86,6 +86,7 @@ class AssetMaintenancesController extends Controller
             $assetMaintenance->cost = $request->input('cost');
             $assetMaintenance->notes = $request->input('notes');
             $assetMaintenance->repair_method = $request->input('repair_method');
+            $assetMaintenance->risk_level = $request->input('risk_level');
 
             // Save the asset maintenance data
             $assetMaintenance->asset_id = $asset->id;
@@ -159,6 +160,7 @@ class AssetMaintenancesController extends Controller
         $maintenance->cost =  $request->input('cost');
         $maintenance->notes = $request->input('notes');
         $maintenance->repair_method = $request->input('repair_method');
+        $maintenance->risk_level = $request->input('risk_level');
         $maintenance->asset_maintenance_type = $request->input('asset_maintenance_type');
         $maintenance->title = $request->input('title');
         $maintenance->start_date = $request->input('start_date');
@@ -274,7 +276,7 @@ class AssetMaintenancesController extends Controller
         
         // Get custom field values
         $macAddress = $maintenance->asset ? $maintenance->asset->getAttribute('_snipeit_mac_address_1') : null;
-        $maintenanceStatus = $maintenance->asset ? $maintenance->asset->getAttribute('_snipeit_maintenance_status_2') : null;
+        $maintenanceStatus = self::getMaintenanceStatus($maintenance);
         
         $pdfContent = $this->generatePdfWithGpdf('asset_maintenances.pdf', [
 'maintenance' => $maintenance,
@@ -381,13 +383,29 @@ class AssetMaintenancesController extends Controller
         });
 
         // Filtering logic
-        if ($request->filled('filter') && $request->filled('start_date') && $request->filled('end_date')) {
-            $start = $request->input('start_date');
-            $end = $request->input('end_date');
-            if ($request->input('filter') === 'created_at') {
+        if ($request->filled('filter')) {
+            if ($request->input('filter') === 'all' && $request->filled('start_date') && $request->filled('end_date')) {
+                $start = $request->input('start_date');
+                $end = $request->input('end_date');
+                $maintenancesQuery->whereDate('start_date', '>=', $start)
+                                  ->whereDate('completion_date', '<=', $end);
+            } elseif ($request->input('filter') === 'department') {
+                $maintenancesQuery->where('periodic', true);
+                // Add date filtering for department maintenances
+                if ($request->filled('start_date') && $request->filled('end_date')) {
+                    $start = $request->input('start_date');
+                    $end = $request->input('end_date');
+                    $maintenancesQuery->whereDate('start_date', '>=', $start)
+                                      ->whereDate('completion_date', '<=', $end);
+                }
+            } elseif ($request->input('filter') === 'created_at' && $request->filled('start_date') && $request->filled('end_date')) {
+                $start = $request->input('start_date');
+                $end = $request->input('end_date');
                 $maintenancesQuery->whereDate('created_at', '>=', $start)
                                   ->whereDate('created_at', '<=', $end);
-            } elseif ($request->input('filter') === 'maintenance_date') {
+            } elseif ($request->input('filter') === 'maintenance_date' && $request->filled('start_date') && $request->filled('end_date')) {
+                $start = $request->input('start_date');
+                $end = $request->input('end_date');
                 $maintenancesQuery->whereDate('start_date', '>=', $start)
                                   ->whereDate('completion_date', '<=', $end);
             }
@@ -400,9 +418,10 @@ class AssetMaintenancesController extends Controller
                 $maintenance->macAddress = $maintenance->asset->getAttribute('_snipeit_mac_address_1');
                 $maintenance->maintenanceStatus = $maintenance->asset->getAttribute('_snipeit_maintenance_status_2');
                 
-                // Get assigned user information using alternative approach
-                if ($maintenance->asset->assigned_type == 'App\Models\User' && $maintenance->asset->assigned_to) {
-                    $assignedUser = \App\Models\User::with('department')->find($maintenance->asset->assigned_to);
+                // Get original assigned user from acceptance record
+                $acceptance = $maintenance->maintenanceAcceptances->first();
+                if ($acceptance && $acceptance->assigned_to_id) {
+                    $assignedUser = \App\Models\User::with('department')->find($acceptance->assigned_to_id);
                     $maintenance->assignedUser = $assignedUser;
                 } else {
                     $maintenance->assignedUser = null;
@@ -441,6 +460,46 @@ class AssetMaintenancesController extends Controller
     }
 
     /**
+     * Get the maintenance status based on completion and acceptance
+     *
+     * @param AssetMaintenance $maintenance
+     * @return string
+     */
+    private static function getMaintenanceStatus(AssetMaintenance $maintenance)
+    {
+        // Check if maintenance is declined (highest priority)
+        $acceptance = $maintenance->maintenanceAcceptances()->first();
+        if ($acceptance && $acceptance->declined_at) {
+            return 'Declined';
+        }
+
+        // Check if maintenance is completed (only if accepted and past completion date)
+        if ($maintenance->completion_date && now()->isAfter($maintenance->completion_date)) {
+            // If accepted and past completion date, mark as completed
+            if ($acceptance && $acceptance->accepted_at) {
+                return 'Completed';
+            }
+            // If not accepted and not declined and past completion date, keep as pending
+            if (!$acceptance || $acceptance->isPending()) {
+                return 'Pending';
+            }
+        }
+
+        // Check if maintenance is accepted
+        if ($acceptance && $acceptance->accepted_at) {
+            return 'Under Maintenance';
+        }
+
+        // Check if maintenance is pending acceptance
+        if ($acceptance && $acceptance->isPending()) {
+            return 'Pending';
+        }
+
+        // Default: in progress
+        return 'In Progress';
+    }
+
+    /**
      * Export declined asset maintenances as a PDF using the declined_pdf view.
      */
     public function exportDeclinedPdf(Request $request)
@@ -458,8 +517,25 @@ class AssetMaintenancesController extends Controller
 
         // Filtering logic (optional: add date range if needed)
         if ($request->filled('filter')) {
-            if ($request->input('filter') === 'department') {
-                $maintenancesQuery->whereNotNull('periodic_maintenance_id');
+            if ($request->input('filter') === 'all' && $request->filled('start_date') && $request->filled('end_date')) {
+                $start = $request->input('start_date');
+                $end = $request->input('end_date');
+                $maintenancesQuery->whereDate('start_date', '>=', $start)
+                                  ->whereDate('completion_date', '<=', $end);
+            } elseif ($request->input('filter') === 'department') {
+                $maintenancesQuery->where('periodic', true);
+                // Add date filtering for department maintenances
+                if ($request->filled('start_date') && $request->filled('end_date')) {
+                    $start = $request->input('start_date');
+                    $end = $request->input('end_date');
+                    $maintenancesQuery->whereDate('start_date', '>=', $start)
+                                      ->whereDate('completion_date', '<=', $end);
+                }
+            } elseif ($request->input('filter') === 'declined' && $request->filled('start_date') && $request->filled('end_date')) {
+                $start = $request->input('start_date');
+                $end = $request->input('end_date');
+                $maintenancesQuery->whereDate('start_date', '>=', $start)
+                                  ->whereDate('completion_date', '<=', $end);
             } elseif ($request->input('filter') === 'created_at' && $request->filled('start_date') && $request->filled('end_date')) {
                 $start = $request->input('start_date');
                 $end = $request->input('end_date');
@@ -477,9 +553,11 @@ class AssetMaintenancesController extends Controller
         foreach ($maintenances as $maintenance) {
             if ($maintenance->asset) {
                 $maintenance->macAddress = $maintenance->asset->getAttribute('_snipeit_mac_address_1');
-                $maintenance->maintenanceStatus = $maintenance->asset->getAttribute('_snipeit_maintenance_status_2');
-                if ($maintenance->asset->assigned_type == 'App\\Models\\User' && $maintenance->asset->assigned_to) {
-                    $assignedUser = \App\Models\User::with('department')->find($maintenance->asset->assigned_to);
+                $maintenance->maintenanceStatus = self::getMaintenanceStatus($maintenance);
+                // Get original assigned user from acceptance record
+                $acceptance = $maintenance->maintenanceAcceptances->first();
+                if ($acceptance && $acceptance->assigned_to_id) {
+                    $assignedUser = \App\Models\User::with('department')->find($acceptance->assigned_to_id);
                     $maintenance->assignedUser = $assignedUser;
                 } else {
                     $maintenance->assignedUser = null;
@@ -545,12 +623,15 @@ class AssetMaintenancesController extends Controller
                 $assetMaintenance->cost = $validated['cost'] ?? null;
                 $assetMaintenance->notes = $validated['notes'] ?? null;
                 $assetMaintenance->repair_method = $validated['repair_method'] ?? null;
+                $assetMaintenance->risk_level = $validated['risk_level'] ?? null;
                 $assetMaintenance->asset_id = $asset->id;
                 $assetMaintenance->asset_maintenance_type = $validated['asset_maintenance_type'];
                 $assetMaintenance->title = $validated['title'];
                 $assetMaintenance->start_date = $validated['start_date'];
                 $assetMaintenance->completion_date = $validated['completion_date'] ?? null;
                 $assetMaintenance->created_by = auth()->id();
+                // Set periodic to true to identify this as a department maintenance
+                $assetMaintenance->periodic = true;
                 if (($assetMaintenance->completion_date !== null)
                     && ($assetMaintenance->start_date !== '')
                     && ($assetMaintenance->start_date !== '0000-00-00')
@@ -585,6 +666,7 @@ class AssetMaintenancesController extends Controller
             'notes' => 'nullable|string',
             'repair_method' => 'nullable|string',
             'is_warranty' => 'nullable|boolean',
+            'risk_level' => 'nullable|in:high,medium,low',
         ]);
         $department = \App\Models\Department::with('users.assets')->findOrFail($validated['department_id']);
         return view('asset_maintenances.confirm_department', [
@@ -609,8 +691,12 @@ class AssetMaintenancesController extends Controller
             'notes' => 'nullable|string',
             'repair_method' => 'nullable|string',
             'is_warranty' => 'nullable|boolean',
+            'risk_level' => 'nullable|in:high,medium,low',
         ]);
         $createdCount = 0;
+        // Generate a unique identifier for this department maintenance batch
+        $batchId = time() . '_' . auth()->id();
+        
         foreach ($validated['user_asset'] as $user_id => $asset_ids) {
             foreach ($asset_ids as $asset_id) {
                 $assetMaintenance = new \App\Models\AssetMaintenance();
@@ -619,12 +705,15 @@ class AssetMaintenancesController extends Controller
                 $assetMaintenance->cost = $validated['cost'] ?? null;
                 $assetMaintenance->notes = $validated['notes'] ?? null;
                 $assetMaintenance->repair_method = $validated['repair_method'] ?? null;
+                $assetMaintenance->risk_level = $validated['risk_level'] ?? null;
                 $assetMaintenance->asset_id = $asset_id;
                 $assetMaintenance->asset_maintenance_type = $validated['asset_maintenance_type'];
                 $assetMaintenance->title = $validated['title'];
                 $assetMaintenance->start_date = $validated['start_date'];
                 $assetMaintenance->completion_date = $validated['completion_date'] ?? null;
                 $assetMaintenance->created_by = auth()->id();
+                // Set periodic to true to identify this as a department maintenance
+                $assetMaintenance->periodic = true;
                 if (($assetMaintenance->completion_date !== null)
                     && ($assetMaintenance->start_date !== '')
                     && ($assetMaintenance->start_date !== '0000-00-00')

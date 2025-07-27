@@ -96,6 +96,13 @@ class AssetPresenter extends Presenter
                 'visible' => true,
                 'formatter' => 'statuslabelsLinkObjFormatter',
             ], [
+                'field' => 'maintenance_status',
+                'searchable' => true,
+                'sortable' => true,
+                'title' => trans('admin/hardware/table.maintenance_status'),
+                'visible' => true,
+                'formatter' => 'maintenanceStatusFormatter',
+            ], [
                 'field' => 'assigned_to',
                 'searchable' => true,
                 'sortable' => true,
@@ -518,12 +525,12 @@ class AssetPresenter extends Presenter
 
         // Asset tag
         if ($this->asset_tag) {
-            $str .= ' ('.$this->model->asset_tag.')';
+            $str .= "\n(".$this->model->asset_tag.')';
         }
 
         // Asset Model name
         if ($this->model->model) {
-            $str .= ' - '.$this->model->model->name;
+            $str .= "\n".$this->model->model->name;
         }
 
         return $str;

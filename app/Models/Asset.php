@@ -739,6 +739,54 @@ class Asset extends Depreciable
     }
 
     /**
+     * Get the latest maintenance status for this asset
+     *
+     * @return string|null
+     */
+    public function getLatestMaintenanceStatus()
+    {
+        $latestMaintenance = $this->assetmaintenances()
+            ->with('maintenanceAcceptances')
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        if (!$latestMaintenance) {
+            return null;
+        }
+
+        // Check if maintenance is declined (highest priority)
+        $acceptance = $latestMaintenance->maintenanceAcceptances()->first();
+        if ($acceptance && $acceptance->declined_at) {
+            return 'Declined';
+        }
+
+        // Check if maintenance is completed (only if accepted and past completion date)
+        if ($latestMaintenance->completion_date && now()->isAfter($latestMaintenance->completion_date)) {
+            // If accepted and past completion date, mark as completed
+            if ($acceptance && $acceptance->accepted_at) {
+                return 'Completed';
+            }
+            // If not accepted and not declined and past completion date, keep as pending
+            if (!$acceptance || $acceptance->isPending()) {
+                return 'Pending';
+            }
+        }
+
+        // Check if maintenance is accepted
+        if ($acceptance && $acceptance->accepted_at) {
+            return 'Under Maintenance';
+        }
+
+        // Check if maintenance is pending acceptance
+        if ($acceptance && $acceptance->isPending()) {
+            return 'Pending';
+        }
+
+        // Default: in progress
+        return 'In Progress';
+    }
+
+    /**
      * Get user who created the item
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]

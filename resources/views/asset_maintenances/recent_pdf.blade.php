@@ -19,12 +19,23 @@
     @endif
 </head>
 <body>
-    <h2>قائمة الصيانة الدورية للأصول </h2>
+    @if(isset($filter) && $filter === 'all')
+        <h2>قائمة جميع الصيانات </h2>
+    @else
+        <h2>قائمة الصيانة الدورية للأصول </h2>
+    @endif
     @if(isset($filter) && $start_date && $end_date)
         @if($filter === 'created_at')
             <p style="text-align:center;">اعد التقرير من: {{ $start_date }} الى {{ $end_date }}</p>
         @elseif($filter === 'maintenance_date')
             <p style="text-align:center;">تاريخ الصيانة من: {{ $start_date }} الى {{ $end_date }}</p>
+        @elseif($filter === 'all')
+            <p style="text-align:center;">من: {{ $start_date }} الى {{ $end_date }}</p>
+       
+        @elseif($filter === 'department')
+            <p style="text-align:center;">من: {{ $start_date }} الى {{ $end_date }}</p>
+        @else
+            <p style="text-align:center;">من: {{ $start_date }} الى {{ $end_date }}</p>
         @endif
     @endif
     <table>
@@ -34,6 +45,7 @@
         <th> الانتهاء تاريخ</th>
                 <th>البدء تاريخ</th>
                 <th>الصيانة طريقة</th>
+                <th>مستوى الخطر</th>
                 <th>الصيانة نوع</th>
                 <th> اعد
                     <br>
@@ -42,7 +54,7 @@
                 <th>ل مخصص</th>
                 <th>الأصل</th>
                 <th>القسم</th>
-                <th>الرقم</th>
+                <th>#</th>
             </tr>
         </thead>
         <tbody>
@@ -50,7 +62,7 @@
                 <tr>
                     <td>
                         @php
-                            $acceptance = $m->maintenanceAcceptances->where('assigned_to_id', $m->asset->assigned_to ?? null)->first();
+                            $acceptance = $m->maintenanceAcceptances->first();
                             $signature = $acceptance && $acceptance->signature_filename
                                 ? asset('uploads/signatures/' . $acceptance->signature_filename)
                                 : null;
@@ -64,15 +76,20 @@
                     <td>{{ $m->completion_date ?? '-' }}</td>
                     <td>{{ $m->start_date ?? '-' }}</td>
                     <td>{{ $m->repair_method ?? '-' }}</td>
+                    <td>{{ ucfirst($m->risk_level ?? '-') }}</td>
                     <td>{{ $m->asset_maintenance_type ?? '-' }}</td>
                     <td>{{ $m->adminuser ? $m->adminuser->present()->name() : '-' }}</td>
                     <td>{{ $m->maintenanceStatus ?? '-' }}</td>
                     <td>
-                        @if($m->assignedUser)
-                            @if(method_exists($m->assignedUser, 'present') && $m->assignedUser->present())
-                                {{ $m->assignedUser->present()->fullName() }}
+                        @php
+                            $acceptance = $m->maintenanceAcceptances->first();
+                            $originalUser = $acceptance ? \App\Models\User::find($acceptance->assigned_to_id) : null;
+                        @endphp
+                        @if($originalUser)
+                            @if(method_exists($originalUser, 'present') && $originalUser->present())
+                                {{ $originalUser->present()->fullName() }}
                             @else
-                                {{ trim(($m->assignedUser->first_name ?? '') . ' ' . ($m->assignedUser->last_name ?? '')) }}
+                                {{ trim(($originalUser->first_name ?? '') . ' ' . ($originalUser->last_name ?? '')) }}
                             @endif
                         @else
                             -
@@ -81,13 +98,12 @@
                     <td>
                         @if($m->asset)
                             {{ $m->asset->name ?? '-' }} <br> ({{ $m->asset->asset_tag ?? '-' }}) {{ $m->asset->model->name ?? '-' }}@if($m->assignedUser)
-                              <br>  -> {{ method_exists($m->assignedUser, 'present') && $m->assignedUser->present() ? $m->assignedUser->present()->fullName() : trim(($m->assignedUser->first_name ?? '') . ' ' . ($m->assignedUser->last_name ?? '')) }}
                             @endif
                         @else
                             -
                         @endif
                     </td>
-                    <td>{{ $m->assignedUser && $m->assignedUser->department ? $m->assignedUser->department->name : '-' }}</td>
+                    <td>{{ $originalUser && $originalUser->department ? $originalUser->department->name : '-' }}</td>
                     <td>{{ $m->id }}</td>
                 </tr>
             @endforeach

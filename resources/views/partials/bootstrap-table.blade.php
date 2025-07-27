@@ -897,6 +897,41 @@
         }
     }
 
+    function maintenanceStatusFormatter(value, row) {
+        if (value) {
+            var badgeClass = '';
+            var statusText = '';
+            switch(value.toLowerCase()) {
+                case 'completed':
+                    badgeClass = 'badge-success';
+                    statusText = 'Completed';
+                    break;
+                case 'under maintenance':
+                    badgeClass = 'badge-info';
+                    statusText = 'Under Maintenance';
+                    break;
+                case 'pending':
+                    badgeClass = 'badge-warning';
+                    statusText = 'Pending';
+                    break;
+                case 'declined':
+                    badgeClass = 'badge-danger';
+                    statusText = 'Declined';
+                    break;
+                case 'in progress':
+                    badgeClass = 'badge-primary';
+                    statusText = 'In Progress';
+                    break;
+                default:
+                    badgeClass = 'badge-secondary';
+                    statusText = value.charAt(0).toUpperCase() + value.slice(1);
+            }
+            return '<span class="badge ' + badgeClass + '">' + statusText + '</span>';
+        } else {
+            return '<span class="text-muted">-</span>';
+        }
+    }
+
     function iconFormatter(value) {
         if (value) {
             return '<i class="' + value + '  icon-med"></i>';

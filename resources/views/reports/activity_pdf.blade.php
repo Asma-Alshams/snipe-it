@@ -20,8 +20,12 @@
     <h2>تقرير سير العمل  </h2>
     @if(isset($location) && $location && isset($start_date) && isset($end_date))
         <p style="text-align:center;">لموقع: {{ $location->name }}<br>من {{ $start_date }} الى {{ $end_date }}</p>
+    @elseif(isset($department) && $department && isset($start_date) && isset($end_date))
+        <p style="text-align:center;">لقسم: {{ $department->name }}<br>من {{ $start_date }} الى {{ $end_date }}</p>
     @elseif(isset($location) && $location)
         <p style="text-align:center;">لموقع: {{ $location->name }}</p>
+    @elseif(isset($department) && $department)
+        <p style="text-align:center;">لقسم: {{ $department->name }}</p>
     @elseif(isset($start_date) && isset($end_date))
         <p style="text-align:center;">من {{ $start_date }} الى {{ $end_date }}</p>
     @endif
