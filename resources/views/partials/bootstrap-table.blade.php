@@ -901,32 +901,39 @@
         if (value) {
             var badgeClass = '';
             var statusText = '';
+            var backgroundColor = '';
             switch(value.toLowerCase()) {
+                case 'waiting':
+                    badgeClass = 'badge-primary';
+                    statusText = 'Waiting';
+                    backgroundColor = '#337ab7'; // Blue
+                    break;
                 case 'completed':
                     badgeClass = 'badge-success';
                     statusText = 'Completed';
+                    backgroundColor = '#5cb85c'; // Green
                     break;
-                case 'under maintenance':
-                    badgeClass = 'badge-info';
+                case 'under_maintenance':
+                    badgeClass = 'badge-warning';
                     statusText = 'Under Maintenance';
+                    backgroundColor = '#f0ad4e'; // Orange
                     break;
                 case 'pending':
-                    badgeClass = 'badge-warning';
+                    badgeClass = 'badge-secondary';
                     statusText = 'Pending';
+                    backgroundColor = '#777'; // Grey
                     break;
                 case 'declined':
-                    badgeClass = 'badge-danger';
+                    badgeClass = 'badge-dark';
                     statusText = 'Declined';
-                    break;
-                case 'in progress':
-                    badgeClass = 'badge-primary';
-                    statusText = 'In Progress';
+                    backgroundColor = '#333'; // Black
                     break;
                 default:
                     badgeClass = 'badge-secondary';
                     statusText = value.charAt(0).toUpperCase() + value.slice(1);
+                    backgroundColor = '#777'; // Grey
             }
-            return '<span class="badge ' + badgeClass + '">' + statusText + '</span>';
+            return '<span class="badge ' + badgeClass + '" style="background-color: ' + backgroundColor + ';">' + statusText + '</span>';
         } else {
             return '<span class="text-muted">-</span>';
         }

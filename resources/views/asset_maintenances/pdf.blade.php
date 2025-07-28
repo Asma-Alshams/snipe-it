@@ -94,10 +94,7 @@
             <td>الملاحظات</td>
         </tr>
    
-        <tr>
-            <th>{{ $maintenanceStatus ?? '-' }} </th>
-            <td>حالة الصيانة</td>
-        </tr>
+       
         <tr>
             <th>@php
                     $acceptance = $maintenance->maintenanceAcceptances->first();

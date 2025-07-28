@@ -29,15 +29,15 @@
         <thead>
             <tr>
                 <th>التوقيع</th>
-                <th>ملاحظات الرفض</th>
-                <th>Risk Level</th>
-                <th>Maintenance Status</th>
-                <th>الصيانة نوع</th>
+                <th>ملاحظات <br>الرفض</th>
+                <th>مستوى <br>الخطر</th>
+                <th>حالة <br>الصيانة</th>
+                <th>نوع <br>الصيانة</th>
                 <th> اعد<br>من قبل</th>
-                <th>ل مخصص</th>
+                <th>مخصص<br>ل</th>
                 <th>الأصل</th>
                 <th>القسم</th>
-                <th>الرقم</th>
+                <th>#</th>
                
             </tr>
         </thead>

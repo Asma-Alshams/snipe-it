@@ -168,7 +168,28 @@ use Carbon\Carbon;
                 Risk Level
               </div>
               <div class="col-md-9">
-                {{ ucfirst($assetMaintenance->risk_level) }}
+                @php
+                    $badgeClass = '';
+                    $backgroundColor = '';
+                    switch(strtolower($assetMaintenance->risk_level)) {
+                        case 'high':
+                            $badgeClass = 'badge-danger';
+                            $backgroundColor = '#d9534f';
+                            break;
+                        case 'medium':
+                            $badgeClass = 'badge-warning';
+                            $backgroundColor = '#f0ad4e';
+                            break;
+                        case 'low':
+                            $badgeClass = 'badge-success';
+                            $backgroundColor = '#5cb85c';
+                            break;
+                        default:
+                            $badgeClass = 'badge-secondary';
+                            $backgroundColor = '#777';
+                    }
+                @endphp
+                <span class="badge {{ $badgeClass }}" style="background-color: {{ $backgroundColor }};">{{ ucfirst($assetMaintenance->risk_level) }}</span>
               </div>
             </div> <!-- /row -->
             @endif

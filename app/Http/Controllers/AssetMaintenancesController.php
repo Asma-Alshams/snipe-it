@@ -460,43 +460,57 @@ class AssetMaintenancesController extends Controller
     }
 
     /**
-     * Get the maintenance status based on completion and acceptance
+     * Get the maintenance status based on acceptance and date ranges
      *
      * @param AssetMaintenance $maintenance
      * @return string
      */
     private static function getMaintenanceStatus(AssetMaintenance $maintenance)
     {
-        // Check if maintenance is declined (highest priority)
         $acceptance = $maintenance->maintenanceAcceptances()->first();
+        $currentDate = now();
+        
+        // Check if user declined the maintenance
         if ($acceptance && $acceptance->declined_at) {
-            return 'Declined';
+            return 'declined';
         }
-
-        // Check if maintenance is completed (only if accepted and past completion date)
-        if ($maintenance->completion_date && now()->isAfter($maintenance->completion_date)) {
-            // If accepted and past completion date, mark as completed
-            if ($acceptance && $acceptance->accepted_at) {
-                return 'Completed';
-            }
-            // If not accepted and not declined and past completion date, keep as pending
-            if (!$acceptance || $acceptance->isPending()) {
-                return 'Pending';
-            }
-        }
-
-        // Check if maintenance is accepted
+        
+        // Check if user accepted the maintenance
         if ($acceptance && $acceptance->accepted_at) {
-            return 'Under Maintenance';
+            // If current date is not between start and completion date
+            if ($maintenance->start_date && $maintenance->completion_date) {
+                $startDate = \Carbon\Carbon::parse($maintenance->start_date);
+                $completionDate = \Carbon\Carbon::parse($maintenance->completion_date);
+                
+                if ($currentDate->lt($startDate)) {
+                    return 'waiting';
+                } elseif ($currentDate->gt($completionDate)) {
+                    return 'completed';
+                } else {
+                    return 'under_maintenance';
+                }
+            } else {
+                // If no completion date, check if past start date
+                if ($maintenance->start_date) {
+                    $startDate = \Carbon\Carbon::parse($maintenance->start_date);
+                    if ($currentDate->lt($startDate)) {
+                        return 'waiting';
+                    } else {
+                        return 'under_maintenance';
+                    }
+                } else {
+                    return 'under_maintenance';
+                }
+            }
         }
-
-        // Check if maintenance is pending acceptance
-        if ($acceptance && $acceptance->isPending()) {
-            return 'Pending';
+        
+        // If user hasn't accepted or declined yet
+        if (!$acceptance || $acceptance->isPending()) {
+            return 'pending';
         }
-
-        // Default: in progress
-        return 'In Progress';
+        
+        // Default fallback
+        return 'pending';
     }
 
     /**
