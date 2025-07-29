@@ -74,7 +74,7 @@ class AssetMaintenancesTransformer
             'notes'         => ($assetmaintenance->notes) ? Helper::parseEscapedMarkedownInline($assetmaintenance->notes) : null,
             'repair_method' => ($assetmaintenance->repair_method) ? Helper::parseEscapedMarkedownInline($assetmaintenance->repair_method) : null,
             'risk_level' => ($assetmaintenance->risk_level) ? e($assetmaintenance->risk_level) : null,
-            'maintenance_status' => self::getMaintenanceStatus($assetmaintenance),
+            'maintenance_status' => $assetmaintenance->status ?: self::getMaintenanceStatus($assetmaintenance),
             'supplier'      => ($assetmaintenance->supplier) ?  [
                     'id' => $assetmaintenance->supplier->id,
                     'name'=> e($assetmaintenance->supplier->name)
@@ -118,6 +118,11 @@ class AssetMaintenancesTransformer
      */
     public static function getMaintenanceStatus(AssetMaintenance $assetmaintenance)
     {
+        // If the maintenance has a status field set, use it
+        if ($assetmaintenance->status) {
+            return $assetmaintenance->status;
+        }
+        
         $acceptance = $assetmaintenance->maintenanceAcceptances()->first();
         $currentDate = now();
         
@@ -136,7 +141,9 @@ class AssetMaintenancesTransformer
                 if ($currentDate->lt($startDate)) {
                     return 'waiting';
                 } elseif ($currentDate->gt($completionDate)) {
-                    return 'completed';
+                    // Don't automatically change to completed if past completion date and accepted
+                    // Status should be manually changed by user
+                    return 'under_maintenance';
                 } else {
                     return 'under_maintenance';
                 }

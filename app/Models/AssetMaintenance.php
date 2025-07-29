@@ -35,6 +35,7 @@ class AssetMaintenance extends Model implements ICompanyableChild
         'notes'                  => 'string|nullable',
         'repair_method'          => 'string|nullable',
         'cost'                   => 'numeric|nullable',
+        'status'                 => 'nullable|in:pending,waiting,under_maintenance,completed,declined',
     ];
 
 
@@ -56,6 +57,7 @@ class AssetMaintenance extends Model implements ICompanyableChild
         'repair_method',
         'cost',
         'risk_level',
+        'status',
         // Used to identify department maintenances
         'periodic',
     ];
@@ -75,7 +77,8 @@ class AssetMaintenance extends Model implements ICompanyableChild
             'asset_maintenance_type',
             'cost',
             'start_date',
-            'completion_date'
+            'completion_date',
+            'status'
         ];
 
     /**

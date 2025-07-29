@@ -17,10 +17,11 @@ class ExpiringLicenseMail extends Mailable
     /**
      * Create a new message instance.
      */
-    public function __construct($params, $threshold)
+    public function __construct($params, $threshold, $isIndividual = false)
     {
         $this->licenses = $params;
         $this->threshold = $threshold;
+        $this->isIndividual = $isIndividual;
     }
 
     /**
@@ -30,9 +31,13 @@ class ExpiringLicenseMail extends Mailable
     {
         $from = new Address(config('mail.from.address'), config('mail.from.name'));
 
+        $subject = $this->isIndividual 
+            ? trans('mail.Your_License_Expiring_Alert')
+            : trans('mail.Expiring_Licenses_Report');
+
         return new Envelope(
             from: $from,
-            subject: trans('mail.Expiring_Licenses_Report'),
+            subject: $subject,
         );
     }
 
@@ -41,11 +46,16 @@ class ExpiringLicenseMail extends Mailable
      */
     public function content(): Content
     {
+        $template = $this->isIndividual 
+            ? 'notifications.markdown.report-expiring-licenses-individual'
+            : 'notifications.markdown.report-expiring-licenses';
+
         return new Content(
-            markdown: 'notifications.markdown.report-expiring-licenses',
+            markdown: $template,
             with: [
                 'licenses'  => $this->licenses,
                 'threshold'  => $this->threshold,
+                'isIndividual' => $this->isIndividual,
             ]
         );
     }

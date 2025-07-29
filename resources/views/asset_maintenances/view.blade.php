@@ -194,6 +194,46 @@ use Carbon\Carbon;
             </div> <!-- /row -->
             @endif
 
+            @if ($assetMaintenance->status)
+            <div class="row">
+              <div class="col-md-3">
+                Maintenance Status
+              </div>
+              <div class="col-md-9">
+                @php
+                    $badgeClass = '';
+                    $backgroundColor = '';
+                    switch($assetMaintenance->status) {
+                        case 'completed':
+                            $badgeClass = 'badge-success';
+                            $backgroundColor = '#5cb85c';
+                            break;
+                        case 'under_maintenance':
+                            $badgeClass = 'badge-warning';
+                            $backgroundColor = '#f0ad4e';
+                            break;
+                        case 'waiting':
+                            $badgeClass = 'badge-info';
+                            $backgroundColor = '#5bc0de';
+                            break;
+                        case 'pending':
+                            $badgeClass = 'badge-secondary';
+                            $backgroundColor = '#777';
+                            break;
+                        case 'declined':
+                            $badgeClass = 'badge-danger';
+                            $backgroundColor = '#d9534f';
+                            break;
+                        default:
+                            $badgeClass = 'badge-secondary';
+                            $backgroundColor = '#777';
+                    }
+                @endphp
+                <span class="badge {{ $badgeClass }}" style="background-color: {{ $backgroundColor }};">{{ ucwords(str_replace('_', ' ', $assetMaintenance->status)) }}</span>
+              </div>
+            </div> <!-- /row -->
+            @endif
+
 
           </div><!-- /row-new-striped -->
       </div><!-- /box-body -->

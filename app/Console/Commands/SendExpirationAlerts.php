@@ -63,7 +63,17 @@ class SendExpirationAlerts extends Command
             $licenses = License::getExpiringLicenses($alert_interval);
             if ($licenses->count() > 0) {
                 $this->info(trans_choice('mail.license_expiring_alert', $licenses->count(), ['count' => $licenses->count(), 'threshold' => $alert_interval]));
+                
+                // Send to admin recipients
                 Mail::to($recipients)->send(new ExpiringLicenseMail($licenses, $alert_interval));
+                
+                // Send to individual license email addresses
+                foreach ($licenses as $license) {
+                    if (!empty($license->license_email)) {
+                        $this->info("Sending license expiration alert to: {$license->license_email} for license: {$license->name}");
+                        Mail::to($license->license_email)->send(new ExpiringLicenseMail(collect([$license]), $alert_interval, true));
+                    }
+                }
             }
         } else {
             if ($settings->alert_email == '') {

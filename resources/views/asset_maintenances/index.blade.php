@@ -298,15 +298,10 @@ window.maintenanceStatusFormatter = function(value, row) {
         var statusText = '';
         var backgroundColor = '';
         switch(value.toLowerCase()) {
-            case 'waiting':
-                badgeClass = 'badge-primary';
-                statusText = 'Waiting';
-                backgroundColor = '#337ab7'; // Blue
-                break;
             case 'completed':
-                badgeClass = 'badge-success';
+                badgeClass = 'badge-primary';
                 statusText = 'Completed';
-                backgroundColor = '#5cb85c'; // Green
+                backgroundColor = '#337ab7'; // Blue
                 break;
             case 'under_maintenance':
                 badgeClass = 'badge-warning';
@@ -319,14 +314,19 @@ window.maintenanceStatusFormatter = function(value, row) {
                 backgroundColor = '#777'; // Grey
                 break;
             case 'declined':
-                badgeClass = 'badge-dark';
+                badgeClass = 'badge-secondary';
                 statusText = 'Declined';
                 backgroundColor = '#333'; // Black
+                break;
+            case 'in_progress':
+                badgeClass = 'badge-primary';
+                statusText = 'In Progress';
+                backgroundColor = '#337ab7'; // Blue
                 break;
             default:
                 badgeClass = 'badge-secondary';
                 statusText = value.charAt(0).toUpperCase() + value.slice(1);
-                backgroundColor = '#777'; // Grey
+                backgroundColor = '#777'; // Gray
         }
         return '<span class="badge ' + badgeClass + '" style="background-color: ' + backgroundColor + ';">' + statusText + '</span>';
     } else {

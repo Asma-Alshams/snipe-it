@@ -753,6 +753,11 @@ class Asset extends Depreciable
             return null;
         }
 
+        // If the maintenance has a status field set, use it
+        if ($latestMaintenance->status) {
+            return $latestMaintenance->status;
+        }
+
         $acceptance = $latestMaintenance->maintenanceAcceptances()->first();
         $currentDate = now();
         
@@ -771,7 +776,9 @@ class Asset extends Depreciable
                 if ($currentDate->lt($startDate)) {
                     return 'waiting';
                 } elseif ($currentDate->gt($completionDate)) {
-                    return 'completed';
+                    // Don't automatically change to completed if past completion date and accepted
+                    // Status should be manually changed by user
+                    return 'under_maintenance';
                 } else {
                     return 'under_maintenance';
                 }

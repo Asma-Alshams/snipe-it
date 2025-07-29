@@ -128,6 +128,22 @@
             {!! $errors->first('risk_level', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
           </div>
         </div>
+
+        <!-- Maintenance Status -->
+        <div class="form-group {{ $errors->has('status') ? ' has-error' : '' }}">
+          <label for="status" class="col-md-3 control-label">Maintenance Status</label>
+          <div class="col-md-4">
+            <select class="form-control" name="status" id="status">
+              <option value="">Select Status</option>
+              <option value="pending" {{ old('status', $item->status) == 'pending' ? 'selected' : '' }}>Pending</option>
+              <option value="waiting" {{ old('status', $item->status) == 'waiting' ? 'selected' : '' }}>Waiting</option>
+              <option value="under_maintenance" {{ old('status', $item->status) == 'under_maintenance' ? 'selected' : '' }}>Under Maintenance</option>
+              <option value="completed" {{ old('status', $item->status) == 'completed' ? 'selected' : '' }}>Completed</option>
+              <option value="declined" {{ old('status', $item->status) == 'declined' ? 'selected' : '' }}>Declined</option>
+            </select>
+            {!! $errors->first('status', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+          </div>
+        </div>
         
         @include ('partials.forms.edit.supplier-select', ['translated_name' => trans('general.supplier'), 'fieldname' => 'supplier_id'])
 

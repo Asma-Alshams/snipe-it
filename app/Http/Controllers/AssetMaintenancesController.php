@@ -87,6 +87,7 @@ class AssetMaintenancesController extends Controller
             $assetMaintenance->notes = $request->input('notes');
             $assetMaintenance->repair_method = $request->input('repair_method');
             $assetMaintenance->risk_level = $request->input('risk_level');
+            $assetMaintenance->status = $request->input('status', 'pending');
 
             // Save the asset maintenance data
             $assetMaintenance->asset_id = $asset->id;
@@ -161,6 +162,7 @@ class AssetMaintenancesController extends Controller
         $maintenance->notes = $request->input('notes');
         $maintenance->repair_method = $request->input('repair_method');
         $maintenance->risk_level = $request->input('risk_level');
+        $maintenance->status = $request->input('status');
         $maintenance->asset_maintenance_type = $request->input('asset_maintenance_type');
         $maintenance->title = $request->input('title');
         $maintenance->start_date = $request->input('start_date');
@@ -467,6 +469,11 @@ class AssetMaintenancesController extends Controller
      */
     private static function getMaintenanceStatus(AssetMaintenance $maintenance)
     {
+        // If the maintenance has a status field set, use it
+        if ($maintenance->status) {
+            return $maintenance->status;
+        }
+        
         $acceptance = $maintenance->maintenanceAcceptances()->first();
         $currentDate = now();
         
@@ -485,7 +492,9 @@ class AssetMaintenancesController extends Controller
                 if ($currentDate->lt($startDate)) {
                     return 'waiting';
                 } elseif ($currentDate->gt($completionDate)) {
-                    return 'completed';
+                    // Don't automatically change to completed if past completion date and accepted
+                    // Status should be manually changed by user
+                    return 'under_maintenance';
                 } else {
                     return 'under_maintenance';
                 }

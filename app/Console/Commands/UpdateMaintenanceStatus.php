@@ -37,11 +37,11 @@ class UpdateMaintenanceStatus extends Command
         $updatedCount = 0;
 
         foreach ($maintenances as $maintenance) {
-            // Check if the maintenance should be marked as completed
+            // Check if the maintenance is past completion date but should remain under maintenance
             if (now()->isAfter($maintenance->completion_date)) {
-                // The status is automatically determined by the getMaintenanceStatus method
+                // The status is now manually controlled - don't automatically mark as completed
                 // This command can be used to log or perform additional actions
-                $this->line("Maintenance ID {$maintenance->id} has completion date {$maintenance->completion_date} - status will show as completed");
+                $this->line("Maintenance ID {$maintenance->id} has completion date {$maintenance->completion_date} - status remains under maintenance for manual completion");
                 $updatedCount++;
             }
         }
