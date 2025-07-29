@@ -58,6 +58,7 @@ class AssetMaintenance extends Model implements ICompanyableChild
         'cost',
         'risk_level',
         'status',
+        'created_by',
         // Used to identify department maintenances
         'periodic',
     ];
