@@ -67,6 +67,14 @@ Route::group(['prefix' => 'licenses', 'middleware' => ['auth']], function () {
             'getExportLicensesCsv'
         ]
     )->name('licenses.export');
+    
+    Route::get(
+        'pdf',
+        [
+            Licenses\LicensesController::class,
+            'exportPdf'
+        ]
+    )->name('licenses.pdf');
 });
 
 Route::resource('licenses', Licenses\LicensesController::class, [

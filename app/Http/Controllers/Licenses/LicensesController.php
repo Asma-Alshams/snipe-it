@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Omaralalwi\Gpdf\Facade\Gpdf as GpdfFacade;
 
 /**
  * This controller handles all actions related to Licenses for
@@ -388,5 +389,88 @@ class LicensesController extends Controller
         ]);
 
         return $response;
+    }
+
+    /**
+     * Helper to generate PDF using Gpdf with proper options for Arabic/RTL support.
+     *
+     * @param string $viewRoute
+     * @param array $data
+     * @return string
+     */
+    private function generatePdfWithGpdf(string $viewRoute, array $data): string
+    {
+        $html = view($viewRoute, $data)->render();
+        return GpdfFacade::generate($html, [
+            'mode' => 'utf-8',
+            'default_font' => 'dejavusans',
+        ]);
+    }
+
+    /**
+     * Export all licenses as a PDF report.
+     */
+    public function exportPdf(Request $request)
+    {
+        $this->authorize('view', License::class);
+        
+        $licensesQuery = License::with([
+            'company',
+            'manufacturer',
+            'category',
+            'supplier',
+            'adminuser',
+        ])->orderBy('created_at', 'desc');
+
+        // Apply company scope
+        Company::scopeCompanyables($licensesQuery);
+
+        // Filtering logic
+        if ($request->filled('filter') && $request->filled('start_date') && $request->filled('end_date')) {
+            if ($request->input('filter') === 'all') {
+                $start = $request->input('start_date');
+                $end = $request->input('end_date');
+                $licensesQuery->whereDate('created_at', '>=', $start)
+                              ->whereDate('created_at', '<=', $end);
+            } elseif ($request->input('filter') === 'expiration_date') {
+                $start = $request->input('start_date');
+                $end = $request->input('end_date');
+                $licensesQuery->whereDate('expiration_date', '>=', $start)
+                              ->whereDate('expiration_date', '<=', $end);
+            } elseif ($request->input('filter') === 'purchase_date') {
+                $start = $request->input('start_date');
+                $end = $request->input('end_date');
+                $licensesQuery->whereDate('purchase_date', '>=', $start)
+                              ->whereDate('purchase_date', '<=', $end);
+            }
+        }
+        // If no filters provided, show all licenses (full report)
+
+        $licenses = $licensesQuery->get();
+        
+        // Get branding settings for logo
+        $branding_settings = \App\Http\Controllers\SettingsController::getPDFBranding();
+        $logo = '';
+        if (!is_null($branding_settings->acceptance_pdf_logo)) {
+            $logo = public_path() . '/uploads/' . $branding_settings->acceptance_pdf_logo;
+        } elseif (!is_null($branding_settings->logo)) {
+            $logo = public_path() . '/uploads/' . $branding_settings->logo;
+        }
+        
+        $data = [
+            'licenses' => $licenses,
+            'logo' => $logo,
+            'filter' => $request->input('filter'),
+            'start_date' => $request->input('start_date'),
+            'end_date' => $request->input('end_date'),
+        ];
+        
+        $pdfContent = $this->generatePdfWithGpdf('licenses.report_pdf', $data);
+        $filename = 'licenses-report-' . date('Y-m-d-his') . '.pdf';
+        
+        return response($pdfContent, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"'
+        ]);
     }
 }

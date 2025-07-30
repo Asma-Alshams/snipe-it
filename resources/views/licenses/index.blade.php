@@ -15,6 +15,9 @@
     @endcan
 @can('view', \App\Models\License::class)
     <a class="btn btn-default pull-right" href="{{ route('licenses.export') }}" style="margin-right: 5px;">{{ trans('general.export') }}</a>
+    <button type="button" class="btn btn-primary pull-right text-white" style="margin-right: 10px;" data-toggle="modal" data-target="#reportModal">
+        <i class="fas fa-file-pdf"></i> Generate Report
+    </button>
 @endcan
 @stop
 
@@ -49,6 +52,48 @@
       <div class="box-footer clearfix">
       </div>
     </div><!-- /.box -->
+  </div>
+</div>
+
+<!-- Report Modal -->
+<div class="modal fade" id="reportModal" tabindex="-1" role="dialog" aria-labelledby="reportModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title" id="reportModalLabel">Generate Licenses Report</h4>
+      </div>
+      <div class="modal-body">
+        <form id="reportForm" method="GET" action="{{ route('licenses.pdf') }}">
+          <div class="form-group">
+            <label for="start_date">Start Date</label>
+            <input type="date" class="form-control" name="start_date" id="start_date" required>
+          </div>
+          <div class="form-group">
+            <label for="end_date">End Date</label>
+            <input type="date" class="form-control" name="end_date" id="end_date" required>
+          </div>
+          <div class="form-group">
+            <label for="reportType">Report Type</label>
+            <select class="form-control" id="reportType" name="filter">
+              <option value="all">By Creation Date</option>
+              <option value="expiration_date">By Expiration Date</option>
+              <option value="purchase_date">By Purchase Date</option>
+            </select>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-success text-white" style="margin-right:10px;"
+    onclick="window.location.href='{{ route('licenses.pdf') }}'">
+  <i class="fas fa-print"></i> Print Full Report
+</button>
+        <button type="submit" form="reportForm" class="btn btn-primary">Generate Report</button>
+      </div>
+    </div>
   </div>
 </div>
 @stop
