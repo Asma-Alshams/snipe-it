@@ -7,7 +7,7 @@
            @page {
   margin: 2mm 6mm 2mm 6mm; /* top, right, bottom, left */ size: landscape; }
         body { font-weight: 500; }
-        h2, h4 { text-align: center; color: #00008B; font-weight: 600; }
+        h2 { text-align: center; color: #00008B; font-weight: 600; }
         table { width: 100%; border-collapse: collapse; text-align:right; }
         th, td { border: 1px solid #333; padding: 5px; }
         th { color: grey; }

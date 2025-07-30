@@ -33,7 +33,7 @@
               <div class="form-group">
                 <label for="filterType">Filter By</label>
                 <select class="form-control" id="filterType" name="filter_type">
-                  <option value="date">Created By Date</option>
+                  <option value="date">By Creation Date</option>
                   <option value="location">Location (Target)</option>
                   <option value="date_location">Date and Location</option>
                   <option value="date_department">Date and Department</option>

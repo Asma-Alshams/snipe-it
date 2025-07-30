@@ -140,6 +140,7 @@
               <option value="under_maintenance" {{ old('status', $item->status) == 'under_maintenance' ? 'selected' : '' }}>Under Maintenance</option>
               <option value="completed" {{ old('status', $item->status) == 'completed' ? 'selected' : '' }}>Completed</option>
               <option value="declined" {{ old('status', $item->status) == 'declined' ? 'selected' : '' }}>Declined</option>
+              <option value="unrepairable" {{ old('status', $item->status) == 'unrepairable' ? 'selected' : '' }}>Unrepairable</option>
             </select>
             {!! $errors->first('status', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
           </div>

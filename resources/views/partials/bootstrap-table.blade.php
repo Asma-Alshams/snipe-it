@@ -924,8 +924,13 @@
                     backgroundColor = '#777'; // Grey
                     break;
                 case 'declined':
-                    badgeClass = 'badge-dark';
+                    badgeClass = 'badge-danger';
                     statusText = 'Declined';
+                    backgroundColor = '#d9534f'; // Red
+                    break;
+                case 'unrepairable':
+                    badgeClass = 'badge-dark';
+                    statusText = 'Unrepairable';
                     backgroundColor = '#333'; // Black
                     break;
                 default:

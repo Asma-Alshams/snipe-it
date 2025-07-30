@@ -40,8 +40,8 @@
             <div class="form-group">
               <label for="reportType">Report Type</label>
               <select class="form-control" id="reportType" name="filter">
-                <option value="all">All Displayed Maintenances</option>
-                <option value="created_at">By Created Date</option>
+                <option value="all">By Maintenances Date (periodic and not periodic)</option>
+                <option value="created_at">By Creation Date</option>
                 <option value="declined">By Declined Maintenance</option>
                 <option value="department">By Periodic Maintenance</option>
               </select>
@@ -314,8 +314,13 @@ window.maintenanceStatusFormatter = function(value, row) {
                 backgroundColor = '#777'; // Grey
                 break;
             case 'declined':
-                badgeClass = 'badge-secondary';
+                badgeClass = 'badge-danger';
                 statusText = 'Declined';
+                backgroundColor = '#d9534f'; // Red
+                break;
+            case 'unrepairable':
+                badgeClass = 'badge-dark';
+                statusText = 'Unrepairable';
                 backgroundColor = '#333'; // Black
                 break;
             case 'in_progress':

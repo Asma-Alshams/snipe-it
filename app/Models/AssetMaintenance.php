@@ -35,7 +35,7 @@ class AssetMaintenance extends Model implements ICompanyableChild
         'notes'                  => 'string|nullable',
         'repair_method'          => 'string|nullable',
         'cost'                   => 'numeric|nullable',
-        'status'                 => 'nullable|in:pending,waiting,under_maintenance,completed,declined',
+        'status'                 => 'nullable|in:pending,waiting,under_maintenance,completed,declined,unrepairable',
     ];
 
 
