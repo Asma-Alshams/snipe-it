@@ -26,7 +26,7 @@
     @endif
     @if(isset($filter) && $start_date && $end_date)
         @if($filter === 'created_at')
-            <p style="text-align:center;">اعد التقرير من: {{ $start_date }} الى {{ $end_date }}</p>
+            <p style="text-align:center;">التي تم اعدادها من: {{ $start_date }} الى {{ $end_date }}</p>
         @elseif($filter === 'maintenance_date')
             <p style="text-align:center;">تاريخ الصيانة من: {{ $start_date }} الى {{ $end_date }}</p>
         @elseif($filter === 'all')
