@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Http\RedirectResponse;
 use \Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Http\Request;
 
 
 /**
@@ -50,5 +51,19 @@ class DashboardController extends Controller
             // Redirect to the profile page
             return redirect()->intended('account/view-assets');
         }
+    }
+
+    /**
+     * Clear all asset comments from session
+     */
+    public function clearComments(Request $request)
+    {
+        session()->forget('asset_comments');
+        
+        if ($request->ajax()) {
+            return response()->json(['success' => true, 'message' => trans('general.comments_cleared')]);
+        }
+        
+        return redirect()->route('dashboard')->with('success', trans('general.comments_cleared'));
     }
 }

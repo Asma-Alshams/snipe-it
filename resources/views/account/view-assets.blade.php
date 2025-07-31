@@ -481,6 +481,9 @@
                       @foreach ($field_array as $db_column => $field_name)
                         <th class="col-md-1" data-switchable="true" data-visible="true">{{ $field_name }}</th>
                       @endforeach
+                      <th class="col-md-2" data-switchable="true" data-visible="true">
+                        {{ trans('general.comments') }}
+                      </th>
 
                     </tr>
 
@@ -547,6 +550,11 @@
                             {{ $asset->{$db_column} }}
                           </td>
                         @endforeach
+                        <td>
+                          <button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#commentModal{{ $asset->id }}">
+                            <i class="fas fa-comment"></i> {{ trans('general.add_comment') }}
+                          </button>
+                        </td>
 
                       </tr>
 
@@ -556,6 +564,38 @@
                     @endforeach
                     </tbody>
                   </table>
+                  
+                  <!-- Comment Modals -->
+                  @foreach ($user->assets as $asset)
+                    <div class="modal fade" id="commentModal{{ $asset->id }}" tabindex="-1" role="dialog" aria-labelledby="commentModalLabel{{ $asset->id }}" aria-hidden="true">
+                      <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title" id="commentModalLabel{{ $asset->id }}">
+                              {{ trans('general.add_comment_for') }} {{ $asset->name }} ({{ $asset->asset_tag }})
+                            </h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                              <span aria-hidden="true">&times;</span>
+                            </button>
+                          </div>
+                          <form action="{{ route('account.add-comment', $asset->id) }}" method="POST">
+                            {{ csrf_field() }}
+                            <div class="modal-body">
+                              <div class="form-group">
+                                <label for="comment{{ $asset->id }}">{{ trans('general.comment') }}</label>
+                                <textarea class="form-control" id="comment{{ $asset->id }}" name="comment" rows="4" required placeholder="{{ trans('general.enter_comment_here') }}"></textarea>
+                              </div>
+                            </div>
+                            <div class="modal-footer">
+                              <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ trans('general.cancel') }}</button>
+                              <button type="submit" class="btn btn-primary">{{ trans('general.submit') }}</button>
+                            </div>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  @endforeach
+                  
           </div><!-- /asset -->
           <div class="tab-pane" id="licenses">
 

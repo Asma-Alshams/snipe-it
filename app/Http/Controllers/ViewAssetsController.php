@@ -254,4 +254,44 @@ class ViewAssetsController extends Controller
     {
         return view('account/requested');
     }
+
+    /**
+     * Add a comment to an asset and notify admin
+     */
+    public function addComment(Request $request, Asset $asset): RedirectResponse
+    {
+        $request->validate([
+            'comment' => 'required|string|max:1000',
+        ]);
+
+        $user = auth()->user();
+        
+        // Create action log entry
+        $logaction = new Actionlog();
+        $logaction->item_id = $asset->id;
+        $logaction->item_type = Asset::class;
+        $logaction->note = $request->input('comment');
+        $logaction->created_by = $user->id;
+        $logaction->target_id = $user->id;
+        $logaction->target_type = User::class;
+        $logaction->logaction('comment added');
+
+        // Create notification data
+        $notificationData = [
+            'username' => $user->username,
+            'employee_number' => $user->employee_num ?? 'N/A',
+            'asset_name' => $asset->name,
+            'asset_tag' => $asset->asset_tag,
+            'comment' => $request->input('comment'),
+            'asset_url' => route('hardware.show', $asset->id),
+            'user_name' => $user->present()->fullName(),
+        ];
+
+        // Store notification in session for admin dashboard
+        $notifications = session()->get('asset_comments', []);
+        $notifications[] = $notificationData;
+        session()->put('asset_comments', $notifications);
+
+        return redirect()->back()->with('success', trans('general.comment_added'));
+    }
 }

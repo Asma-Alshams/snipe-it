@@ -393,6 +393,9 @@ Route::group(['prefix' => 'account', 'middleware' => ['auth']], function () {
     Route::post('request/{itemType}/{itemId}/{cancel_by_admin?}/{requestingUser?}', [ViewAssetsController::class, 'getRequestItem'])
         ->name('account/request-item');
 
+    Route::post('add-comment/{asset}', [ViewAssetsController::class, 'addComment'])
+        ->name('account.add-comment');
+
     Route::get(
         'display-sig/{filename}',
         [ProfileController::class, 'displaySig']
@@ -733,3 +736,8 @@ Route::middleware(['auth'])->get(
     ->breadcrumbs(fn (Trail $trail) =>
     $trail->push('Home', route('home'))
     );
+
+Route::middleware(['auth'])->post(
+    '/clear-comments',
+    [DashboardController::class, 'clearComments']
+)->name('dashboard.clear-comments');

@@ -670,5 +670,24 @@ return [
 
     'months_plural' => '1 month|:count months',
 
+    // Asset Comments
+    'comments' => 'Comments',
+    'add_comment' => 'Add Comment',
+    'comment' => 'Comment',
+    'add_comment_for' => 'Add Comment for',
+    'enter_comment_here' => 'Enter your comment here...',
+    'asset_comments' => 'Asset Comments',
+    'employee_number' => 'Employee Number',
+    'view_asset' => 'View Asset',
+    'clear_all_comments' => 'Clear All Comments',
+    'comments_cleared' => 'All comments have been cleared successfully.',
+    'comment_added' => 'Comment added successfully.',
+    'user' => 'User',
+    'actions' => 'Actions',
+    'view_comments' => 'View Comments',
+    'clear_all' => 'Clear All',
+    'confirm_clear_comments' => 'Are you sure you want to clear all comments?',
+    'close' => 'Close',
+    'notifications' => 'Notifications',
 
 ];

@@ -147,6 +147,85 @@
 </div>
 </div>
 
+<!-- Asset Comments Notifications -->
+@if (session()->has('asset_comments') && count(session('asset_comments')) > 0)
+<div class="row">
+    <div class="col-lg-2 col-xs-6">
+             <!-- small notifications box -->
+        <a href="#" data-toggle="modal" data-target="#commentsModal">
+            <div class="dashboard small-box bg-red">
+                <div class="inner">
+                    <h3>{{ count(session('asset_comments')) }}</h3>
+                    <p>{{ trans('general.notifications') }}</p>
+                </div>
+                <div class="icon" aria-hidden="true">
+                    <i class="fas fa-bell"></i>
+                </div>
+                <span class="small-box-footer">
+                    {{ trans('general.view_all') }}
+                    <x-icon type="arrow-circle-right" />
+                </span>
+            </div>
+        </a>
+    </div><!-- ./col -->
+</div>
+@endif
+
+<!-- Comments Modal -->
+@if (session()->has('asset_comments') && count(session('asset_comments')) > 0)
+<div class="modal fade" id="commentsModal" tabindex="-1" role="dialog" aria-labelledby="commentsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="commentsModalLabel">
+                    <i class="fas fa-bell"></i> {{ trans('general.notifications') }}
+                    <span class="badge badge-red">{{ count(session('asset_comments')) }}</span>
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>{{ trans('general.user') }}</th>
+                                <th>{{ trans('general.employee_number') }}</th>
+                                <th>{{ trans('general.asset') }}</th>
+                                <th>{{ trans('general.comment') }}</th>
+                                <th>{{ trans('general.actions') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (session('asset_comments') as $comment)
+                            <tr>
+                                <td><strong>{{ $comment['user_name'] }}</strong><br><small>{{ $comment['username'] }}</small></td>
+                                <td>{{ $comment['employee_number'] }}</td>
+                                <td><strong>{{ $comment['asset_name'] }}</strong><br><small>{{ $comment['asset_tag'] }}</small></td>
+                                <td>{{ $comment['comment'] }}</td>
+                                <td>
+                                    <a href="{{ $comment['asset_url'] }}" class="btn btn-sm btn-info" target="_blank">
+                                        <i class="fas fa-external-link-alt"></i> {{ trans('general.view_asset') }}
+                                    </a>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-warning" onclick="clearAllComments()">
+                    <i class="fas fa-trash"></i> {{ trans('general.clear_all_comments') }}
+                </button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ trans('general.close') }}</button>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
+
 @if ($counts['grand_total'] == 0)
 
     <div class="row">
@@ -556,5 +635,49 @@
         if (current != last) location.reload();
         last = current;
     });
+
+    // ---------------------------
+    // - CLEAR COMMENTS FUNCTION -
+    // ---------------------------
+    function clearAllComments() {
+        if (confirm('{{ trans('general.confirm_clear_comments') }}')) {
+            $.ajax({
+                type: 'POST',
+                url: '{{ route('dashboard.clear-comments') }}',
+                headers: {
+                    "X-Requested-With": 'XMLHttpRequest',
+                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function (response) {
+                    // Close the modal
+                    $('#commentsModal').modal('hide');
+                    
+                    // Show success message
+                    var successHtml = '<div class="col-md-12" id="success-notification">' +
+                        '<div class="alert alert-success fade in">' +
+                        '<button type="button" class="close" data-dismiss="alert">&times;</button>' +
+                        '<i class="fas fa-check faa-pulse animated"></i>' +
+                        '<strong>{{ trans('general.notification_success') }}: </strong>' +
+                        '{{ trans('general.comments_cleared') }}' +
+                        '</div>' +
+                        '</div>';
+                    
+                    // Insert the success message at the top of the content
+                    $('#main').prepend(successHtml);
+                    
+                    // Remove the notification box
+                    $('.small-box.bg-red').closest('.row').remove();
+                    
+                    // Auto-hide the success message after 5 seconds
+                    setTimeout(function() {
+                        $('#success-notification').fadeOut();
+                    }, 5000);
+                },
+                error: function (xhr, status, error) {
+                    alert('{{ trans('general.something_went_wrong') }}');
+                }
+            });
+        }
+    }
 </script>
 @endpush
