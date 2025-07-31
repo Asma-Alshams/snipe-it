@@ -49,6 +49,7 @@
                 <th>الإجمالي</th>
                 <th>الحد <br> الأدنى</th>
                 <th>المصنع</th>
+                <th>التوقيع</th>
                 <th>مرخص <br> باسم</th>
                 <th>البريد الإلكتروني للمرخص له</th>
                 <th>تاريخ  <br> الانتهاء</th>
@@ -77,6 +78,7 @@
                     <td>{{ $license->seats ?? '-' }}</td>
                     <td>{{ $license->min_amt ?? '-' }}</td>
                     <td>{{ $license->manufacturer ? $license->manufacturer->name : '-' }}</td>
+                    <td> </td>
                     <td>{{ $license->license_name ?? '-' }}</td>
                     <td>{{ $license->license_email ?? '-' }}</td>
                     <td>{{ $license->expiration_date ? \Carbon\Carbon::parse($license->expiration_date)->format('Y-m-d') : '-' }}</td>
