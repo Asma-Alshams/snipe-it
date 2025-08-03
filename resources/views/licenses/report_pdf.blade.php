@@ -41,18 +41,13 @@
     <table>
         <thead>
             <tr>
-                <th>اعد  <br> من قبل</th>
-                <th>تكلفة <br> الشراء</th>
-                <th>تاريخ <br> الإنهاء</th>
-                <th>تاريخ <br> الشراء</th>
-                <th>المتاح</th>
-                <th>الإجمالي</th>
-                <th>الحد <br> الأدنى</th>
+                <th>اعد من قبل</th>
+                <th>تاريخ الشراء</th>
                 <th>المصنع</th>
                 <th>التوقيع</th>
-                <th>مرخص <br> باسم</th>
+                <th>مرخص بأسم</th>
                 <th>البريد الإلكتروني للمرخص له</th>
-                <th>تاريخ  <br> الانتهاء</th>
+                <th>تاريخ الانتهاء</th>
                 <th>الاسم</th>
                 <th>#</th>
             </tr>
@@ -71,12 +66,7 @@
                             -
                         @endif
                     </td>
-                    <td>{{ $license->purchase_cost ?? '-' }}</td>
-                    <td>{{ $license->termination_date ? \Carbon\Carbon::parse($license->termination_date)->format('Y-m-d') : '-' }}</td>
                     <td>{{ $license->purchase_date ? \Carbon\Carbon::parse($license->purchase_date)->format('Y-m-d') : '-' }}</td>
-                    <td>{{ $license->free_seat_count ?? '-' }}</td>
-                    <td>{{ $license->seats ?? '-' }}</td>
-                    <td>{{ $license->min_amt ?? '-' }}</td>
                     <td>{{ $license->manufacturer ? $license->manufacturer->name : '-' }}</td>
                     <td> </td>
                     <td>{{ $license->license_name ?? '-' }}</td>
