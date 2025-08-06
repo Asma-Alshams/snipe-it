@@ -3,6 +3,22 @@
 
 {{ trans('mail.maintenance_halfway_greeting', ['name' => $user->first_name]) }}
 
+@if(isset($maintenances) && $maintenances->count() > 1)
+{{ trans('mail.maintenance_halfway_multiple_message', ['count' => $maintenances->count()]) }}
+
+@component('mail::table')
+<table width="100%">
+<tr><td>&nbsp;</td><td>{{ trans('admin/asset_maintenances/form.title') }}</td><td>{{ trans('admin/asset_maintenances/form.asset_maintenance_type') }}</td><td>{{ trans('admin/asset_maintenances/form.asset') }}</td><td>{{ trans('admin/asset_maintenances/form.completion_date') }}</td><td>{{ trans('mail.view_maintenance') }}</td></tr>
+@foreach ($maintenances as $maintenance)
+@php
+$asset = $maintenance->asset;
+$completion_date = \App\Helpers\Helper::getFormattedDateObject($maintenance->completion_date, 'date', false);
+@endphp
+<tr><td>⚠️</td><td><a href="{{ route('maintenances.show', $maintenance->id) }}">{{ $maintenance->title }}</a></td><td>{{ $maintenance->asset_maintenance_type }}</td><td>{{ $asset->name ?? $asset->asset_tag }}</td><td>{{ is_array($completion_date) ? $completion_date['formatted'] : $completion_date }}</td><td><a href="{{ route('maintenances.show', $maintenance->id) }}" style="display:inline-block;padding:6px 12px;background:#3490dc;color:#fff;text-decoration:none;border-radius:4px;">{{ trans('mail.view_maintenance') }}</a></td></tr>
+@endforeach
+</table>
+@endcomponent
+@else
 {{ trans('mail.maintenance_halfway_message', [
     'maintenance' => $maintenance->title,
     'asset' => $asset->name ?? $asset->asset_tag,
@@ -26,6 +42,7 @@
 @component('mail::button', ['url' => route('maintenances.show', $maintenance->id)])
 {{ trans('mail.view_maintenance') }}
 @endcomponent
+@endif
 
 {{ trans('mail.maintenance_halfway_footer') }}
 

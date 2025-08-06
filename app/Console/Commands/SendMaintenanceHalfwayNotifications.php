@@ -59,6 +59,10 @@ class SendMaintenanceHalfwayNotifications extends Command
         $completionCount = 0;
         $today = Carbon::now();
 
+        // Group maintenances by user for halfway notifications
+        $halfwayMaintenancesByUser = collect();
+        $completionMaintenancesByUser = collect();
+
         foreach ($maintenances as $maintenance) {
             // Skip if no creator user or no email
             if (!$maintenance->adminuser || !$maintenance->adminuser->email) {
@@ -74,24 +78,52 @@ class SendMaintenanceHalfwayNotifications extends Command
             $toleranceEnd = $halfwayDate->copy()->addDay();
             
             if ($today->between($toleranceStart, $toleranceEnd)) {
-                try {
-                    $maintenance->adminuser->notify(new MaintenanceHalfwayNotification($maintenance));
-                    $this->info("Sent halfway notification for maintenance '{$maintenance->title}' to {$maintenance->adminuser->email}");
-                    $halfwayCount++;
-                } catch (\Exception $e) {
-                    $this->error("Failed to send halfway notification for maintenance ID {$maintenance->id}: " . $e->getMessage());
-                }
+                $halfwayMaintenancesByUser->push([
+                    'maintenance' => $maintenance,
+                    'user' => $maintenance->adminuser,
+                    'type' => 'halfway'
+                ]);
             }
             
             // Check for completion date
             if ($today->isSameDay($completionDate)) {
-                try {
-                    $maintenance->adminuser->notify(new MaintenanceCompletionNotification($maintenance));
-                    $this->info("Sent completion notification for maintenance '{$maintenance->title}' to {$maintenance->adminuser->email}");
-                    $completionCount++;
-                } catch (\Exception $e) {
-                    $this->error("Failed to send completion notification for maintenance ID {$maintenance->id}: " . $e->getMessage());
-                }
+                $completionMaintenancesByUser->push([
+                    'maintenance' => $maintenance,
+                    'user' => $maintenance->adminuser,
+                    'type' => 'completion'
+                ]);
+            }
+        }
+
+        // Group by user and send consolidated emails
+        $halfwayByUser = $halfwayMaintenancesByUser->groupBy('user.id');
+        $completionByUser = $completionMaintenancesByUser->groupBy('user.id');
+
+        // Send halfway notifications
+        foreach ($halfwayByUser as $userId => $userMaintenances) {
+            $user = $userMaintenances->first()['user'];
+            $maintenanceList = $userMaintenances->pluck('maintenance');
+            
+            try {
+                $user->notify(new MaintenanceHalfwayNotification($maintenanceList));
+                $this->info("Sent halfway notification for {$maintenanceList->count()} maintenance record(s) to {$user->email}");
+                $halfwayCount += $maintenanceList->count();
+            } catch (\Exception $e) {
+                $this->error("Failed to send halfway notification to user {$user->email}: " . $e->getMessage());
+            }
+        }
+
+        // Send completion notifications
+        foreach ($completionByUser as $userId => $userMaintenances) {
+            $user = $userMaintenances->first()['user'];
+            $maintenanceList = $userMaintenances->pluck('maintenance');
+            
+            try {
+                $user->notify(new MaintenanceCompletionNotification($maintenanceList));
+                $this->info("Sent completion notification for {$maintenanceList->count()} maintenance record(s) to {$user->email}");
+                $completionCount += $maintenanceList->count();
+            } catch (\Exception $e) {
+                $this->error("Failed to send completion notification to user {$user->email}: " . $e->getMessage());
             }
         }
 

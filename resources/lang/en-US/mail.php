@@ -117,4 +117,8 @@ return [
     'maintenance_completion_greeting' => 'Hello :name,',
     'maintenance_completion_message' => 'This is a notification that the maintenance ":maintenance" for asset ":asset" has reached its completion date.',
     'maintenance_completion_footer' => 'Please review the completed maintenance and update the status if needed.',
+    'maintenance_halfway_multiple_subject' => 'You have :count maintenances at halfway point!',
+    'maintenance_halfway_multiple_message' => 'The following :count maintenances have reached their halfway point:',
+    'maintenance_completion_multiple_subject' => 'You have :count maintenances completed!',
+    'maintenance_completion_multiple_message' => 'The following :count maintenances have been completed:',
 ];

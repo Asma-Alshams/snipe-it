@@ -14,9 +14,14 @@ class MaintenanceHalfwayNotification extends Notification
     /**
      * Create a new notification instance.
      */
-    public function __construct(public AssetMaintenance $maintenance)
+    public function __construct(public $maintenances)
     {
-        //
+        // Convert single maintenance to collection for consistency
+        if (!is_array($maintenances) && !$maintenances instanceof \Illuminate\Support\Collection) {
+            $this->maintenances = collect([$maintenances]);
+        } else {
+            $this->maintenances = collect($maintenances);
+        }
     }
 
     /**
@@ -34,17 +39,24 @@ class MaintenanceHalfwayNotification extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
-        $maintenance = $this->maintenance;
+        $maintenance = $this->maintenances->first();
         $asset = $maintenance->asset;
         
-        return (new MailMessage)
-            ->subject(trans('mail.maintenance_halfway_subject', [
+        $subject = $this->maintenances->count() === 1 
+            ? trans('mail.maintenance_halfway_subject', [
                 'asset' => $asset->name ?? $asset->asset_tag,
                 'maintenance' => $maintenance->title
-            ]))
+            ])
+            : trans('mail.maintenance_halfway_multiple_subject', [
+                'count' => $this->maintenances->count()
+            ]);
+        
+        return (new MailMessage)
+            ->subject($subject)
             ->markdown('notifications.markdown.maintenance-halfway', [
-                'maintenance' => $maintenance,
-                'asset' => $asset,
+                'maintenances' => $this->maintenances,
+                'maintenance' => $maintenance, // Keep for backward compatibility
+                'asset' => $asset, // Keep for backward compatibility
                 'user' => $notifiable,
             ]);
     }
@@ -56,10 +68,12 @@ class MaintenanceHalfwayNotification extends Notification
      */
     public function toArray(object $notifiable): array
     {
+        $maintenance = $this->maintenances->first();
         return [
-            'maintenance_id' => $this->maintenance->id,
-            'asset_id' => $this->maintenance->asset_id,
-            'title' => $this->maintenance->title,
+            'maintenance_id' => $maintenance->id,
+            'asset_id' => $maintenance->asset_id,
+            'title' => $maintenance->title,
+            'count' => $this->maintenances->count(),
         ];
     }
 } 

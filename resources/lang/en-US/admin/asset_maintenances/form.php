@@ -12,5 +12,6 @@
         'notes'                  => 'Notes',
         'repair_method'          => 'Repair Method',
         'update'                 => 'Update Asset Maintenance',
-        'create'                 => 'Create Asset Maintenance'
+        'create'                 => 'Create Asset Maintenance',
+        'asset'                  => 'Asset',
     ];

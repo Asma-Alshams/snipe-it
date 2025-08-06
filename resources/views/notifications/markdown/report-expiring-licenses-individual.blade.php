@@ -1,7 +1,7 @@
 @component('mail::message')
 # {{ trans('mail.Your_License_Expiring_Alert') }}
 
-{{ trans('mail.license_expiring_individual_alert', ['count' => $licenses->count(), 'threshold' => $threshold]) }}
+{{ trans_choice('mail.license_expiring_individual_alert', $licenses->count(), ['count' => $licenses->count(), 'threshold' => $threshold]) }}
 
 @component('mail::table')
 
