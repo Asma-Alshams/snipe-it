@@ -13,49 +13,38 @@ class ExpectedCheckinNotification extends Notification
     /**
      * @var
      */
-    private $params;
+    private $assets;
 
     /**
      * Create a new notification instance.
-     *
-     * @param $params
      */
-    public function __construct($params)
+    public function __construct($assets)
     {
-        $this->params = $params;
+        // Accepts a collection or array of assets, or a single asset
+        if (!is_array($assets) && !$assets instanceof \Illuminate\Support\Collection) {
+            $this->assets = collect([$assets]);
+        } else {
+            $this->assets = collect($assets);
+        }
     }
 
-    /**
-     * Get the notification's delivery channels.
-     *
-     * @return array
-     */
     public function via()
     {
-        $notifyBy = [];
-        $item = $this->params['item'];
-
-        $notifyBy[] = 'mail';
-
-        return $notifyBy;
+        return ['mail'];
     }
 
-    /**
-     * Get the mail representation of the notification.
-     *
-     * @return \Illuminate\Notifications\Messages\MailMessage
-     */
     public function toMail()
     {
-        $message = (new MailMessage)->markdown('notifications.markdown.expected-checkin',
-            [
-                'date' => Helper::getFormattedDateObject($this->params->expected_checkin, 'date', false),
-                'asset' => $this->params->present()->name(),
-                'serial' => $this->params->serial,
-                'asset_tag' => $this->params->asset_tag,
-            ])
-            ->subject(trans('mail.Expected_Checkin_Notification', ['name' => $this->params->present()->name()]));
+        $first = $this->assets->first();
+        $subject = trans('mail.Expected_Checkin_Notification', ['count' => $this->assets->count()]);
 
-        return $message;
+        return (new MailMessage)->markdown('notifications.markdown.expected-checkin', [
+            'assets' => $this->assets,
+            'single' => $this->assets->count() === 1,
+            'date' => \App\Helpers\Helper::getFormattedDateObject($first->expected_checkin, 'date', false),
+            'asset' => $first->present()->name(),
+            'serial' => $first->serial,
+            'asset_tag' => $first->asset_tag,
+        ])->subject($subject);
     }
 }
