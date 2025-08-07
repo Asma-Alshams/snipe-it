@@ -68,7 +68,7 @@
                     </td>
                     <td>{{ $license->purchase_date ? \Carbon\Carbon::parse($license->purchase_date)->format('Y-m-d') : '-' }}</td>
                     <td>{{ $license->manufacturer ? $license->manufacturer->name : '-' }}</td> -->
-                    <td style="text-align: center; color: white;">_______________________</td>
+                    <td style="color: white;">_______________________</td>
                     <td>{{ $license->license_name ?? '-' }}</td>
                     <td>{{ $license->license_email ?? '-' }}</td>
                     <td>{{ $license->expiration_date ? \Carbon\Carbon::parse($license->expiration_date)->format('Y-m-d') : '-' }}</td>
