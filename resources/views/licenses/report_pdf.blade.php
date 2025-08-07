@@ -80,7 +80,7 @@
     </table>
     
     <p style="margin-top:40px; text-align:center;">
-    تم إنشاء التقرير في {{ date('Y-m-d H:i') }}
+    تم إنشاء التقرير في {{ date('Y-m-d') }}
     </p>
 </body>
 </html> 
