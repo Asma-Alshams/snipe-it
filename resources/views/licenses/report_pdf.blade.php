@@ -11,7 +11,7 @@
         body { font-weight: 500; }
         h2{ text-align: center; color: #00008B; font-weight: 600; }
         table { width: 100%; border-collapse: collapse; text-align:right; }
-        th, td { border: 1px solid #333; padding: 5px; }
+        th, td { border: 1px solid #333; padding: 7px; }
         th { color: grey; }
     </style>
     @if ($logo ?? false)
@@ -41,21 +41,21 @@
     <table>
         <thead>
             <tr>
-                <th>اعد من قبل</th>
+                <!-- <th>اعد من قبل</th>
                 <th>تاريخ الشراء</th>
-                <th>المصنع</th>
+                <th>المصنع</th> -->
                 <th>التوقيع</th>
                 <th>مرخص بأسم</th>
                 <th>البريد الإلكتروني للمرخص له</th>
                 <th>تاريخ الانتهاء</th>
                 <th>الاسم</th>
-                <th>#</th>
+                <!-- <th>#</th> -->
             </tr>
         </thead>
         <tbody>
             @foreach($licenses as $license)
                 <tr>
-                    <td>
+                    <!-- <td>
                         @if($license->adminuser)
                             @if(method_exists($license->adminuser, 'present') && $license->adminuser->present())
                                 {{ $license->adminuser->present()->fullName() }}
@@ -67,13 +67,13 @@
                         @endif
                     </td>
                     <td>{{ $license->purchase_date ? \Carbon\Carbon::parse($license->purchase_date)->format('Y-m-d') : '-' }}</td>
-                    <td>{{ $license->manufacturer ? $license->manufacturer->name : '-' }}</td>
-                    <td> </td>
+                    <td>{{ $license->manufacturer ? $license->manufacturer->name : '-' }}</td> -->
+                    <td style="text-align: center; color: white;">_______________________</td>
                     <td>{{ $license->license_name ?? '-' }}</td>
                     <td>{{ $license->license_email ?? '-' }}</td>
                     <td>{{ $license->expiration_date ? \Carbon\Carbon::parse($license->expiration_date)->format('Y-m-d') : '-' }}</td>
                     <td>{{ $license->name ?? '-' }}</td>
-                    <td>{{ $license->id }}</td>
+                    <!-- <td>{{ $license->id }}</td> -->
                 </tr>
             @endforeach
         </tbody>
