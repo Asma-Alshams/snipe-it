@@ -17,7 +17,7 @@
     @if (!empty($logo))
         <img src="{{ $logo }}" alt="Logo" width="100%"; />   
     @endif
-    <h2>تقرير سير العمل  </h2>
+    <h2>سجل الأصول </h2>
     @if(isset($location) && $location && isset($start_date) && isset($end_date))
         <p style="text-align:center;">لموقع: {{ $location->name }}<br>من {{ $start_date }} الى {{ $end_date }}</p>
     @elseif(isset($department) && $department && isset($start_date) && isset($end_date))
@@ -33,10 +33,10 @@
         <thead>
             <tr>
                 <th>ملاحظات</th>
-                <th>الهدف</th>
-                <th>العنصر</th>
-                <th>العملية</th>
-                <th>اعد من قبل</th>
+                <th>\ المستلم<br> المكان</th>
+                <th>نوع الاصل</th>
+                <th>نوع العملية</th>
+                <th>اعد <br> من قبل</th>
                 <th>التاريخ</th>
             </tr>
         </thead>

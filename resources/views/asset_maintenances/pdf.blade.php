@@ -107,7 +107,7 @@
                 @else
                     -
                 @endif </th>
-            <td>التوقيع</td>
+            <td>توقيع صاحب الأصل</td>
         </tr>
     </table>
     <p style="margin-top:40px; text-align:center;">

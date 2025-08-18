@@ -19,29 +19,25 @@
     @endif
 </head>
 <body>
-    @if(isset($filter) && $filter === 'all')
+    @if(isset($filter) && ($filter === 'all' || $filter === 'created_at'))
         <h2>قائمة جميع الصيانات </h2>
     @else
-        <h2>قائمة الصيانة الدورية للأصول </h2>
+        <h2>قائمة الصيانة الدورية للأجهزة المحمولة واللوحية 
+            <br>
+            لموظفين الامانة العامة
+        </h2>
     @endif
     @if(isset($filter) && $start_date && $end_date)
         @if($filter === 'created_at')
-            <p style="text-align:center;">التي تم اعدادها من: {{ $start_date }} الى {{ $end_date }}</p>
-        @elseif($filter === 'maintenance_date')
-            <p style="text-align:center;">تاريخ الصيانة من: {{ $start_date }} الى {{ $end_date }}</p>
-        @elseif($filter === 'all')
-            <p style="text-align:center;">من: {{ $start_date }} الى {{ $end_date }}</p>
-       
-        @elseif($filter === 'department')
-            <p style="text-align:center;">من: {{ $start_date }} الى {{ $end_date }}</p>
+            <p style="text-align:center;">التي تم اعدادها من: {{ $start_date }} الى {{ $end_date }}</p>     
         @else
-            <p style="text-align:center;">من: {{ $start_date }} الى {{ $end_date }}</p>
+        <p style="text-align:center;">تاريخ الصيانة من: {{ $start_date }} الى {{ $end_date }}</p>
         @endif
     @endif
     <table>
         <thead>
             <tr>
-                <th>التوقيع</th>
+                <th>التوقيع صاحب الأصل</th>
         <th> الانتهاء تاريخ</th>
                 <th>البدء تاريخ</th>
                 <th>الصيانة طريقة</th>
@@ -49,8 +45,8 @@
                 <th>نوع الصيانة</th>
                 <th> اعد
                     <br>من قبل</th>
-                <th>حالة الصيانة</th>
-                <th>ل مخصص</th>
+                <th>حالة <br>الصيانة</th>
+                <th>صاحب <br>الأصل</th>
                 <th>الأصل</th>
                 <th>القسم</th>
                 <th>#</th>

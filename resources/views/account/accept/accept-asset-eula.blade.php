@@ -49,17 +49,11 @@
         <img  width="100%" src="{{ $logo }}">
     </center>
 @endif
-<br>
-<div style="display: flex; justify-content: space-between; align-items: flex-start;">
-    <div style="text-align: center; flex-grow: 1;">
+        <br>
         <h3 style="margin: 0; font-weight: 600; color: #00008B;">
-           
-            استمارة تسليم واستلام عهدة من ادارة النظم والحلول الرقمية 
+            استمارة تسليم واستلام عهدة من إدارة النظم والحلول الرقمية 
         </h3>
         <br>
-    </div>
-</div>
-
 <table>
     <tr class="label0">
         <td colspan="2"> بيانات مقدم الطلب   </td>
@@ -148,11 +142,11 @@
         <td colspan="2">  اتفاقية مستخدمي أجهزة الحاسب المحمول والأجهزة اللوحية </td>
     </tr>
     <tr>
-        <td colspan="2" > 
+        <td colspan="2" style="font-size: 13px; text-align: center;"> 
             @if ($eula)
-            <div  style="text-align: right; unicode-bidi: bidi-override;  font-size: 13px; padding: 6px;">
+        
                 {!! $eula !!}
-    </div>
+
             @endif
         </td>  
   

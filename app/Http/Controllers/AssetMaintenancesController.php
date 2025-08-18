@@ -418,7 +418,8 @@ class AssetMaintenancesController extends Controller
         foreach ($maintenances as $maintenance) {
             if ($maintenance->asset) {
                 $maintenance->macAddress = $maintenance->asset->getAttribute('_snipeit_mac_address_1');
-                $maintenance->maintenanceStatus = $maintenance->asset->getAttribute('_snipeit_maintenance_status_2');
+                // Compute maintenance status consistently with other reports
+                $maintenance->maintenanceStatus = self::getMaintenanceStatus($maintenance);
                 
                 // Get original assigned user from acceptance record
                 $acceptance = $maintenance->maintenanceAcceptances->first();
@@ -494,9 +495,9 @@ class AssetMaintenancesController extends Controller
                 } elseif ($currentDate->gt($completionDate)) {
                     // Don't automatically change to completed if past completion date and accepted
                     // Status should be manually changed by user
-                    return 'under_maintenance';
+                    return 'under maintenance';
                 } else {
-                    return 'under_maintenance';
+                    return 'under maintenance';
                 }
             } else {
                 // If no completion date, check if past start date
@@ -505,10 +506,10 @@ class AssetMaintenancesController extends Controller
                     if ($currentDate->lt($startDate)) {
                         return 'waiting';
                     } else {
-                        return 'under_maintenance';
+                        return 'under maintenance';
                     }
                 } else {
-                    return 'under_maintenance';
+                    return 'under maintenance';
                 }
             }
         }
