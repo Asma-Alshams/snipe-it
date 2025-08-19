@@ -57,7 +57,7 @@
         </tbody>
     </table>
     <p style="margin-top:40px; text-align:center;">
-        التاريخ {{ date('Y-m-d H:i') }}
+        التاريخ {{ date('Y-m-d') }}
     </p>
 </body>
 </html> 
