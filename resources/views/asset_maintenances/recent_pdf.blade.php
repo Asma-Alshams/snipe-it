@@ -38,7 +38,7 @@
         <thead>
             <tr>
                 <th>التوقيع صاحب الأصل</th>
-        <th> الانتهاء تاريخ</th>
+                <th> الانتهاء تاريخ</th>
                 <th>البدء تاريخ</th>
                 <th>الصيانة طريقة</th>
                 <th>مستوى <br>الخطر</th>
@@ -49,7 +49,7 @@
                 <th>صاحب <br>الأصل</th>
                 <th>الأصل</th>
                 <th>القسم</th>
-                <th>#</th>
+                <!-- <th>#</th> -->
             </tr>
         </thead>
         <tbody>
@@ -99,7 +99,7 @@
                         @endif
                     </td>
                     <td>{{ $originalUser && $originalUser->department ? $originalUser->department->name : '-' }}</td>
-                    <td>{{ $m->id }}</td>
+                    <!-- <td>{{ $m->id }}</td> -->
                 </tr>
             @endforeach
         </tbody>

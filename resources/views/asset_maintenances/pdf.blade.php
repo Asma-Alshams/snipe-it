@@ -46,21 +46,17 @@
             <td>   الأصل</td>
         </tr>
         <tr>
-            <th> {{ $item_serial ?? '-' }} </th>
-            <td>رقم التسلسل </td>
-        </tr>
-        <tr>
             <th> {{ $maintenance->asset_maintenance_type ?? '-' }}</th>
             <td>النوع</td>
         </tr>
-        <tr>
+        <!-- <tr>
             <th> {{ $maintenance->supplier && $maintenance->supplier->name ? $maintenance->supplier->name : '-' }}</th>
             <td>المورد</td>
-        </tr>
-        <tr>
+        </tr> -->
+        <!-- <tr>
             <th> {{ $user && isset($user->userloc) && $user->userloc ? $user->userloc->name : '-' }}</th>
             <td> الموقع </td>
-        </tr>
+        </tr> -->
 
         <tr>
             <th> {{ $maintenance->cost ?? '-' }} </th>

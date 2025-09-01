@@ -92,7 +92,7 @@
     </tr> 
     <tr><td colspan="2" style="padding-top: 20px;"> <br> </td></tr>
     <tr class="label0">
-        <td colspan="2">   نوع الجهاز  </td>
+        <td colspan="2">  نوع الجهاز  </td>
     </tr>
     <tr>
         <td class="label">  ماركة الجهاز   </td>
@@ -142,12 +142,14 @@
         <td colspan="2">  اتفاقية مستخدمي أجهزة الحاسب المحمول والأجهزة اللوحية </td>
     </tr>
     <tr>
-        <td colspan="2" style="font-size: 13px; text-align: center;"> 
+        <td colspan="2" style="text-align: center;"> 
+            <div style="border: 1px solid #000; padding-right: 35px; padding-left: 35px; padding-top: 15px; text-align: right; font-size: 13px;">
             @if ($eula)
         
                 {!! $eula !!}
 
             @endif
+            </div>
         </td>  
   
     </tr>
