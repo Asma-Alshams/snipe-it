@@ -6,11 +6,12 @@
     <style>
         @page {
             margin: 2mm 10mm 2mm 10mm; /* top, right, bottom, left */      }
-        body { font-size: 16px; font-weight: 400 !important; direction: rtl; }
+        body { font-size: 17px; font-weight: 400 !important; direction: rtl; }
         h2 { text-align: center; color: #00008B; font-weight: 600; }
         table { width: 100%; border-collapse: collapse; }
         th, td { border: 1px solid #333; padding: 4px; text-align: right; }
         th { color: grey;  }
+        td { font-size: 15px; }
     </style>
 </head>
 <body>
@@ -45,7 +46,21 @@
                 <tr> 
                     <td>{{ $row['note'] ?? '' }}</td>
                     <td>{{ $row['target'] }}</td>
-                    <td>{{ $row['item'] }}</td>
+                    <td>{{ $row['item'] }}<br>
+                        @if(isset($row['location_changes']) && $row['location_changes'])
+                            <small style="color: #666;">
+                                @if($row['location_changes']['old'])
+                                    from: {{ $row['location_changes']['old'] }}
+                                @endif
+                                @if($row['location_changes']['old'] && $row['location_changes']['new'])
+                                   -> 
+                                @endif
+                                @if($row['location_changes']['new'])
+                                    to: {{ $row['location_changes']['new'] }}
+                                @endif
+                            </small>
+                        @endif
+                    </td>
                     <td>{{ $row['action'] }}</td>
                     <td>{{ $row['created_by'] }}</td>
                     <td>{{ $row['date'] }}</td>

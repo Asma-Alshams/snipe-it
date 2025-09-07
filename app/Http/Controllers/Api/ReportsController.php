@@ -68,6 +68,35 @@ class ReportsController extends Controller
             $actionlogs = $actionlogs->whereNotNull('filename');
         }
 
+        // Add location-based filtering including log_meta search
+        if ($request->filled('location_id')) {
+            $actionlogs = $actionlogs->where(function($q) use ($request) {
+                $location_id = $request->input('location_id');
+                // Standard location filtering
+                $q->where('target_type', 'App\\Models\\Location')
+                  ->where('target_id', $location_id);
+                $q->orWhere('location_id', $location_id);
+                
+                // Search in log_meta for location changes - comprehensive patterns
+                // Moving FROM location (old value)
+                $q->orWhere('log_meta', 'like', '%"location_id":{"old":"' . $location_id . '"%');
+                $q->orWhere('log_meta', 'like', '%"location_id":{"old":' . $location_id . '%');
+                
+                // Moving TO location (new value) - from null
+                $q->orWhere('log_meta', 'like', '%"location_id":{"old":null,"new":"' . $location_id . '"}%');
+                $q->orWhere('log_meta', 'like', '%"location_id":{"old":null,"new":' . $location_id . '}%');
+                
+                // Moving TO location (new value) - from another location
+                $q->orWhere('log_meta', 'like', '%"location_id":{"old":"%","new":"' . $location_id . '"}%');
+                $q->orWhere('log_meta', 'like', '%"location_id":{"old":%,"new":' . $location_id . '}%');
+                $q->orWhere('log_meta', 'like', '%"location_id":{"old":%,"new":"' . $location_id . '"}%');
+                
+                // Moving FROM location (old value) - to another location
+                $q->orWhere('log_meta', 'like', '%"location_id":{"old":"' . $location_id . '","new":%');
+                $q->orWhere('log_meta', 'like', '%"location_id":{"old":' . $location_id . ',"new":%');
+            });
+        }
+
         $allowed_columns = [
             'id',
             'created_at',

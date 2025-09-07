@@ -324,6 +324,38 @@ class ReportsController extends Controller
         return $response;
     }
 
+    /**
+     * Helper method to add location filtering including log_meta search
+     * Always includes both standard location filtering and log_meta search
+     */
+    private function addLocationFilter($query, $location_id)
+    {
+        return $query->where(function($q) use ($location_id) {
+            // Standard location filtering
+            $q->where('target_type', 'App\\Models\\Location')
+              ->where('target_id', $location_id);
+            $q->orWhere('location_id', $location_id);
+            
+            // Search in log_meta for location changes - comprehensive patterns
+            // Moving FROM location (old value)
+            $q->orWhere('log_meta', 'like', '%"location_id":{"old":"' . $location_id . '"%');
+            $q->orWhere('log_meta', 'like', '%"location_id":{"old":' . $location_id . '%');
+            
+            // Moving TO location (new value) - from null
+            $q->orWhere('log_meta', 'like', '%"location_id":{"old":null,"new":"' . $location_id . '"}%');
+            $q->orWhere('log_meta', 'like', '%"location_id":{"old":null,"new":' . $location_id . '}%');
+            
+            // Moving TO location (new value) - from another location
+            $q->orWhere('log_meta', 'like', '%"location_id":{"old":"%","new":"' . $location_id . '"}%');
+            $q->orWhere('log_meta', 'like', '%"location_id":{"old":%,"new":' . $location_id . '}%');
+            $q->orWhere('log_meta', 'like', '%"location_id":{"old":%,"new":"' . $location_id . '"}%');
+            
+            // Moving FROM location (old value) - to another location
+            $q->orWhere('log_meta', 'like', '%"location_id":{"old":"' . $location_id . '","new":%');
+            $q->orWhere('log_meta', 'like', '%"location_id":{"old":' . $location_id . ',"new":%');
+        });
+    }
+
     public function generateActivityPdf(Request $request)
     {
         $this->authorize('reports.view');
@@ -331,11 +363,7 @@ class ReportsController extends Controller
         $filterType = $request->input('filter_type');
         if ($filterType === 'date_location') {
             if ($request->filled('location_id')) {
-                $query->where(function($q) use ($request) {
-                    $q->where('target_type', 'App\\Models\\Location')
-                      ->where('target_id', $request->input('location_id'));
-                    $q->orWhere('location_id', $request->input('location_id'));
-                });
+                $query = $this->addLocationFilter($query, $request->input('location_id'));
             }
             if ($request->filled('start_date') && $request->filled('end_date')) {
                 $query->whereDate('created_at', '>=', $request->input('start_date'))
@@ -345,11 +373,7 @@ class ReportsController extends Controller
             $query->whereDate('created_at', '>=', $request->input('start_date'))
                   ->whereDate('created_at', '<=', $request->input('end_date'));
         } else if ($filterType === 'location' && $request->filled('location_id')) {
-            $query->where(function($q) use ($request) {
-                $q->where('target_type', 'App\\Models\\Location')
-                  ->where('target_id', $request->input('location_id'));
-                $q->orWhere('location_id', $request->input('location_id'));
-            });
+            $query = $this->addLocationFilter($query, $request->input('location_id'));
         } else if ($filterType === 'date_department') {
             if ($request->filled('department_id')) {
                 $query->whereHas('adminuser', function($q) use ($request) {
@@ -364,6 +388,36 @@ class ReportsController extends Controller
         $logs = $query->orderBy('created_at', 'desc')->get();
         $rows = [];
         foreach ($logs as $log) {
+            // Parse location changes from log_meta
+            $location_changes = null;
+            if ($log->log_meta) {
+                $meta_array = json_decode($log->log_meta, true);
+                if (isset($meta_array['location_id'])) {
+                    $old_location_id = $meta_array['location_id']['old'] ?? null;
+                    $new_location_id = $meta_array['location_id']['new'] ?? null;
+                    
+                    $old_location_name = null;
+                    $new_location_name = null;
+                    
+                    if ($old_location_id) {
+                        $old_location = \App\Models\Location::find($old_location_id);
+                        $old_location_name = $old_location ? $old_location->name : "Location ID: $old_location_id";
+                    }
+                    
+                    if ($new_location_id) {
+                        $new_location = \App\Models\Location::find($new_location_id);
+                        $new_location_name = $new_location ? $new_location->name : "Location ID: $new_location_id";
+                    }
+                    
+                    if ($old_location_name || $new_location_name) {
+                        $location_changes = [
+                            'old' => $old_location_name,
+                            'new' => $new_location_name
+                        ];
+                    }
+                }
+            }
+            
             $rows[] = [
                 'date' => $log->created_at->format('Y-m-d H:i'),
                 'created_by' => $log->adminuser ? $log->adminuser->getFullNameAttribute() : '',
@@ -371,6 +425,7 @@ class ReportsController extends Controller
                 'item' => $log->item ? $log->item->getDisplayNameAttribute() : '',
                 'target' => $log->target ? ($log->targetType() == 'user' ? $log->target->getFullNameAttribute() : $log->target->getDisplayNameAttribute()) : '',
                 'note' => $log->note ?? '',
+                'location_changes' => $location_changes,
             ];
         }
         $branding_settings = \App\Http\Controllers\SettingsController::getPDFBranding();
