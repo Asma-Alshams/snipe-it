@@ -32,6 +32,7 @@ use App\Http\Requests\CustomAssetReportRequest;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\RedirectResponse;
 use Omaralalwi\Gpdf\Facade\Gpdf as GpdfFacade;
+use TCPDF;
 
 /**
  * This controller handles all actions related to Reports for
@@ -435,6 +436,8 @@ class ReportsController extends Controller
         } elseif (!is_null($branding_settings->logo)) {
             $logo = public_path() . '/uploads/' . $branding_settings->logo;
         }
+
+        // Generate HTML from Blade template
         $html = view('reports.activity_pdf', [
             'rows' => $rows,
             'start_date' => $request->input('start_date'),
@@ -443,9 +446,35 @@ class ReportsController extends Controller
             'department' => $request->input('department_id') ? \App\Models\Department::find($request->input('department_id')) : null,
             'logo' => $logo,
         ])->render();
-        $pdfContent = GpdfFacade::generate($html);
+
+        // Create TCPDF instance for HTML rendering
+        $pdf = new TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
+        
+        // Set document information
+        $pdf->SetCreator('Snipe-IT');
+        $pdf->SetAuthor('Snipe-IT');
+        $pdf->SetTitle('Activity Report');
+        $pdf->SetSubject('Asset Activity Report');
+        
+        // Remove default header/footer
+        $pdf->setPrintHeader(false);
+        $pdf->setPrintFooter(false);
+        
+        // Set margins
+        $pdf->SetMargins(10, 10, 10);
+        $pdf->SetAutoPageBreak(true, 10);
+        
+        // Add a page
+        $pdf->AddPage();
+        
+        // Set font for Arabic text
+        $pdf->SetFont('dejavusans', '', 12);
+        
+        // Write HTML content
+        $pdf->writeHTML($html, true, false, true, false, '');
+        
         $filename = 'activity-report-' . date('Y-m-d-his') . '.pdf';
-        return response($pdfContent, 200, [
+        return response($pdf->Output($filename, 'S'), 200, [
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => 'attachment; filename="' . $filename . '"'
         ]);

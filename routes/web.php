@@ -577,7 +577,7 @@ Route::group(['prefix' => 'reports', 'middleware' => ['auth']], function () {
         'unaccepted_assets/{deleted?}', [ReportsController::class, 'postAssetAcceptanceReport'])
         ->name('reports/export/unaccepted_assets');
 
-    Route::get('reports/activity/pdf', [ReportsController::class, 'generateActivityPdf'])->name('reports.activity.pdf');
+    Route::get('activity/pdf', [ReportsController::class, 'generateActivityPdf'])->name('reports.activity.pdf');
 
 });
 
