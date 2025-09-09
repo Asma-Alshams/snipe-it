@@ -620,10 +620,12 @@
                 <thead>
                 <tr>
                   <th class="col-md-2">{{ trans('general.name') }}</th>
-                  <th class="col-md-4">{{ trans('admin/licenses/form.license_key') }}</th>
+                  <th class="col-md-3">{{ trans('admin/licenses/form.license_key') }}</th>
                   <th class="col-md-2">{{ trans('admin/licenses/form.to_name') }}</th>
                   <th class="col-md-2">{{ trans('admin/licenses/form.to_email') }}</th>
-                  <th class="col-md-2">{{ trans('general.category') }}</th>
+                  <th class="col-md-1">{{ trans('general.category') }}</th>
+                  <th class="col-md-1">{{ trans('admin/licenses/form.expiration') }}</th>
+                  <th class="col-md-1">{{ trans('general.update') }}</th>
 
                 </tr>
                 </thead>
@@ -654,10 +656,65 @@
                       ------------
                     @endcan
                     <td>{{ ($license->category) ? $license->category->name : trans('general.deleted') }}</td>
+                    <td>
+                      @if($license->expiration_date)
+                        {{ $license->expiration_date->format('Y-m-d') }}
+                      @else
+                        -
+                      @endif
+                    </td>
+                    <td>
+                      <button type="button" 
+                              class="btn btn-primary btn-sm" 
+                              data-toggle="modal" 
+                              data-target="#updateExpirationModal" 
+                              data-license-id="{{ $license->id }}"
+                              data-license-name="{{ $license->name }}"
+                              data-expiration-date="{{ $license->expiration_date ? $license->expiration_date->format('Y-m-d') : '' }}"
+                              title="{{ trans('general.update') }}">
+                        <i class="fas fa-edit"></i>
+                      </button>
+                    </td>
                   </tr>
                 @endforeach
                 </tbody>
               </table>
+          </div>
+
+          <!-- Update Expiration Date Modal -->
+          <div class="modal fade" id="updateExpirationModal" tabindex="-1" role="dialog" aria-labelledby="updateExpirationModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="updateExpirationModalLabel">{{ trans('admin/licenses/form.update_expiration') }}</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <form id="updateExpirationForm" method="POST">
+                  @csrf
+                  @method('PATCH')
+                  <div class="modal-body">
+                    <div class="form-group">
+                      <label for="licenseName">{{ trans('general.name') }}:</label>
+                      <input type="text" class="form-control" id="licenseName" readonly>
+                    </div>
+                    <div class="form-group">
+                      <label for="expirationDate">{{ trans('admin/licenses/form.expiration') }}:</label>
+                      <input type="date" 
+                             class="form-control" 
+                             id="expirationDate" 
+                             name="expiration_date" 
+                             placeholder="{{ trans('admin/licenses/form.expiration') }}">
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ trans('general.cancel') }}</button>
+                    <button type="submit" class="btn btn-primary">{{ trans('general.update') }}</button>
+                  </div>
+                </form>
+              </div>
+            </div>
           </div>
 
           <div class="tab-pane" id="accessories">
@@ -806,4 +863,24 @@
 
 @section('moar_scripts')
   @include ('partials.bootstrap-table')
+  
+  <script>
+    $(document).ready(function() {
+      // Handle modal trigger button clicks
+      $('#updateExpirationModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget); // Button that triggered the modal
+        var licenseId = button.data('license-id');
+        var licenseName = button.data('license-name');
+        var expirationDate = button.data('expiration-date');
+        
+        // Update the modal's content
+        var modal = $(this);
+        modal.find('#licenseName').val(licenseName);
+        modal.find('#expirationDate').val(expirationDate);
+        
+        // Update the form action URL
+        modal.find('#updateExpirationForm').attr('action', '/licenses/' + licenseId + '/update-expiration');
+      });
+    });
+  </script>
 @stop

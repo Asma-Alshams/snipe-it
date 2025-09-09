@@ -473,4 +473,27 @@ class LicensesController extends Controller
             'Content-Disposition' => 'attachment; filename="' . $filename . '"'
         ]);
     }
+
+    /**
+     * Update the expiration date of a license.
+     *
+     * @param Request $request
+     * @param License $license
+     * @return \Illuminate\Http\RedirectResponse
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
+    public function updateExpiration(Request $request, License $license)
+    {
+        $this->authorize('update', $license);
+
+        $request->validate([
+            'expiration_date' => 'nullable|date_format:Y-m-d'
+        ]);
+
+        $license->update([
+            'expiration_date' => $request->input('expiration_date') ?: null
+        ]);
+
+        return redirect()->back()->with('success', trans('admin/licenses/message.update.success'));
+    }
 }

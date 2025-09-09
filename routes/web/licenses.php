@@ -75,6 +75,11 @@ Route::group(['prefix' => 'licenses', 'middleware' => ['auth']], function () {
             'exportPdf'
         ]
     )->name('licenses.pdf');
+    
+    Route::patch(
+        '{license}/update-expiration',
+        [Licenses\LicensesController::class, 'updateExpiration']
+    )->name('licenses.update-expiration');
 });
 
 Route::resource('licenses', Licenses\LicensesController::class, [
