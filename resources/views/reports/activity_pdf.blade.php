@@ -6,19 +6,22 @@
     <style>
 
         body { 
-            font-family: 'dejavu sans';
+          
         }
         .header {
             text-align: center;
+            font-weight: bold;
+            font-family: 'notonaskharabicb';
         }
         h1 { 
             color: #00008B; 
             font-size: 18px; 
-            font-weight: bold;
+            font-weight: heavy;
         }
         .subtitle {
             font-size: 12px;
             color: #333;
+            font-family: 'notonaskharabicnormal';
         }
         table { 
             width: 100%; 
@@ -31,6 +34,8 @@
             border: 1px solid #333; 
             text-align: center;
             font-weight: bold;
+            font-family: 'notonaskharabicb';
+            font-size: 11px;
         }
         td { 
             border: 1px solid #333; 
@@ -79,9 +84,9 @@
         <thead>
             <tr>
                 <th style="width: 22%;">ملاحظات</th>
-                <th style="width: 12%;">المستلم/ المكان</th>
+                <th style="width: 14%;">المستلم/ المكان</th>
                 <th style="width: 27%;">نوع الأصل</th>
-                <th style="width: 15%;">نوع العملية</th>
+                <th style="width: 13%;">نوع العملية</th>
                 <th style="width: 12%;">اعد من قبل</th>
                 <th style="width: 12%;">التاريخ</th>
             </tr>
@@ -89,17 +94,17 @@
         <tbody>
             @forelse($rows as $row)
                 <tr> 
-                        <td style="width: 22%;">{{ $row['note'] ?? '' }}</span></td>
-                        <td style="width: 12%;">{{ $row['target'] }}</span></td>
+                        <td style="width: 22%;">{{ $row['note'] ?? '' }}</td>
+                        <td style="width: 14%;">{{ $row['target'] }}</td>
                         <td style="width: 27%;">
-                        {{ $row['item'] }}</span>
+                        {{ $row['item'] }}
                         @if(isset($row['location_changes']) && $row['location_changes'])
                             <div class="location-change">
                                 @if($row['location_changes']['old'])
                                     From: {{ $row['location_changes']['old'] }}
                                 @endif
                                 @if($row['location_changes']['old'] && $row['location_changes']['new'])
-                                    → 
+                                    -> 
                                 @endif
                                 @if($row['location_changes']['new'])
                                     To: {{ $row['location_changes']['new'] }}
@@ -107,9 +112,9 @@
                             </div>
                         @endif
                     </td>
-                    <td style="width: 15%;">{{ $row['action'] }}</span></td>
-                    <td style="width: 12%;">{{ $row['created_by'] }}</span></td>
-                    <td style="width: 12%;">{{ $row['date'] }}</span></td>
+                    <td style="width: 13%;">{{ $row['action'] }}</td>
+                    <td style="width: 12%;">{{ $row['created_by'] }}</td>
+                    <td style="width: 12%;">{{ $row['date'] }}</td>
                 </tr>
             @empty
                 <tr>

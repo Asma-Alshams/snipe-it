@@ -13,6 +13,7 @@ use App\Models\AssetMaintenance;
 use App\Models\CheckoutAcceptance;
 use App\Models\Company;
 use App\Models\CustomField;
+use App\Services\TcpdfService;
 use App\Models\Depreciation;
 use App\Models\License;
 use App\Models\ReportTemplate;
@@ -447,37 +448,15 @@ class ReportsController extends Controller
             'logo' => $logo,
         ])->render();
 
-        // Create TCPDF instance for HTML rendering
-        $pdf = new TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
+        // Use the new TCPDF service
+        $pdfService = TcpdfService::createForReport('Activity Report', 'Asset Activity Report');
         
-        // Set document information
-        $pdf->SetCreator('Snipe-IT');
-        $pdf->SetAuthor('Snipe-IT');
-        $pdf->SetTitle('Activity Report');
-        $pdf->SetSubject('Asset Activity Report');
-        
-        // Remove default header/footer
-        $pdf->setPrintHeader(false);
-        $pdf->setPrintFooter(false);
-        
-        // Set margins
-        $pdf->SetMargins(10, 10, 10);
-        $pdf->SetAutoPageBreak(true, 10);
-        
-        // Add a page
-        $pdf->AddPage();
-        
-        // Set font for Arabic text
-        $pdf->SetFont('dejavusans', '', 12);
-        
-        // Write HTML content
-        $pdf->writeHTML($html, true, false, true, false, '');
+        $pdfService->addPage()
+                   ->setFont('notonaskharabicnormal', '', 12)
+                   ->writeHtml($html);
         
         $filename = 'activity-report-' . date('Y-m-d-his') . '.pdf';
-        return response($pdf->Output($filename, 'S'), 200, [
-            'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"'
-        ]);
+        return $pdfService->response($filename);
     }
 
 
