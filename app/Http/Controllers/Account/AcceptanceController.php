@@ -79,7 +79,7 @@ class AcceptanceController extends Controller
     }
 
     /**
-     * Generate PDF using Gpdf facade
+     * Generate PDF using Gpdf facade with TCPDF for notes section
      *
      * @param string $viewRoute
      * @param array $data
@@ -87,6 +87,26 @@ class AcceptanceController extends Controller
      */
     private function generatePdfWithGpdf(string $viewRoute, array $data): string
     {
+        // Generate TCPDF content for notes section if notes are present
+        if (isset($data['checkin_note']) || isset($data['checkout_note']) || isset($data['acceptance_note'])) {
+            $tcpdfService = new \App\Services\TcpdfService();
+            try {
+                // Try to generate TCPDF as image first
+                $data['tcpdf_notes_image'] = $tcpdfService->generateNotesTcpdf(
+                    $data['checkin_note'] ?? '',
+                    $data['checkout_note'] ?? '',
+                    $data['acceptance_note'] ?? ''
+                );
+            } catch (Exception $e) {
+                // Fallback to HTML if TCPDF image generation fails
+                $data['tcpdf_notes_html'] = $tcpdfService->generateNotesHtml(
+                    $data['checkin_note'] ?? '',
+                    $data['checkout_note'] ?? '',
+                    $data['acceptance_note'] ?? ''
+                );
+            }
+        }
+        
         $html = view($viewRoute, $data)->render();
         return GpdfFacade::generate($html);
     }
@@ -112,6 +132,26 @@ class AcceptanceController extends Controller
         
         // Prepare data for the accept-asset-eula template
         $data = $this->prepareEulaTemplateData($tableData, $tableParams, $tableId);
+        
+        // Generate TCPDF content for notes section if notes are present
+        if (isset($data['checkin_note']) || isset($data['checkout_note']) || isset($data['acceptance_note'])) {
+            $tcpdfService = new \App\Services\TcpdfService();
+            try {
+                // Try to generate TCPDF as image first
+                $data['tcpdf_notes_image'] = $tcpdfService->generateNotesTcpdf(
+                    $data['checkin_note'] ?? '',
+                    $data['checkout_note'] ?? '',
+                    $data['acceptance_note'] ?? ''
+                );
+            } catch (Exception $e) {
+                // Fallback to HTML if TCPDF image generation fails
+                $data['tcpdf_notes_html'] = $tcpdfService->generateNotesHtml(
+                    $data['checkin_note'] ?? '',
+                    $data['checkout_note'] ?? '',
+                    $data['acceptance_note'] ?? ''
+                );
+            }
+        }
         
         // Generate PDF using the accept-asset-eula template
         $html = view('account.accept.accept-asset-eula', $data)->render();
@@ -269,6 +309,31 @@ class AcceptanceController extends Controller
                 'manufacturer' => (object) ['name' => $request->input('manufacturer', 'Sample Manufacturer')],
             ],
         ];
+
+        // Add notes data for TCPDF generation
+        $data['checkin_note'] = $request->input('checkin_note', '');
+        $data['checkout_note'] = $request->input('checkout_note', '');
+        $data['acceptance_note'] = $request->input('acceptance_note', '');
+
+        // Generate TCPDF content for notes section if notes are present
+        if (isset($data['checkin_note']) || isset($data['checkout_note']) || isset($data['acceptance_note'])) {
+            $tcpdfService = new \App\Services\TcpdfService();
+            try {
+                // Try to generate TCPDF as image first
+                $data['tcpdf_notes_image'] = $tcpdfService->generateNotesTcpdf(
+                    $data['checkin_note'] ?? '',
+                    $data['checkout_note'] ?? '',
+                    $data['acceptance_note'] ?? ''
+                );
+            } catch (Exception $e) {
+                // Fallback to HTML if TCPDF image generation fails
+                $data['tcpdf_notes_html'] = $tcpdfService->generateNotesHtml(
+                    $data['checkin_note'] ?? '',
+                    $data['checkout_note'] ?? '',
+                    $data['acceptance_note'] ?? ''
+                );
+            }
+        }
 
         $html = view('account.accept.accept-asset-eula', $data)->render();
         $pdfContent = GpdfFacade::generate($html);

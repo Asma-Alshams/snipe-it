@@ -121,19 +121,32 @@
     <tr><td colspan="2" style="padding-top: 10px;"> <br> </td></tr>
     <tr>
         <td colspan="2" style="border: none;">
-            <table width="100%">
-                <tr>
-                    <td>:ملاحظات التسليم 
-                        <br>
-                        {{ $checkin_note ?? '' }}</td>
-                    <td>:ملاحظات الاستلام  
-                        <br>
-                        {{ $checkout_note ?? '' }} </td>    
-                    <td>:ملاحظة الموافقة  
-                        <br>
-                        {{ $acceptance_note ?? '' }}</td>
-                </tr>
-            </table>
+            @if(isset($tcpdf_notes_image))
+                <!-- TCPDF generated notes section as image -->
+                <div style="text-align: center;">
+                    <img src="data:image/png;base64,{{ $tcpdf_notes_image }}" style="max-width: 100%; height: auto;" />
+                </div>
+            @elseif(isset($tcpdf_notes_html))
+                <!-- TCPDF styled notes section as HTML -->
+                {!! $tcpdf_notes_html !!}
+            @else
+                <!-- Fallback to original HTML if TCPDF content not available -->
+                <table width="100%">
+                    <tr>
+                        <div>
+                        <td>:ملاحظات التسليم 
+                            <br>
+                            {{ $checkin_note ?? '' }}</td>
+                        <td>:ملاحظات الاستلام  
+                            <br>
+                            {{ $checkout_note ?? '' }} </td>    
+                        <td>:ملاحظة الموافقة  
+                            <br>
+                            {{ $acceptance_note ?? '' }}</td>
+                        </div>
+                    </tr>
+                </table>
+            @endif
         </td>
     </tr> 
             <div style="page-break-before: always;"></div>
