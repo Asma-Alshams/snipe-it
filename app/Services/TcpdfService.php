@@ -220,7 +220,7 @@ class TcpdfService
             $notesPdf->SetAutoPageBreak(false, 0);
             
             // Set font for Arabic text
-            $notesPdf->SetFont('aealarabiya', '', 10);
+            $notesPdf->SetFont('notonaskharabicnormal', '', 10);
             
             // Add page
             $notesPdf->AddPage();
@@ -229,16 +229,16 @@ class TcpdfService
             $notesHtml = '
             <table width="100%" cellpadding="1" cellspacing="0" border="1">
                 <tr>
-                    <td width="33%" style="padding: 5px; text-align: center; font-family: \'aealarabiya\', sans-serif; font-size: 10px;">
+                    <td width="33%" style="padding: 5px; text-align: center; font-family: \'notonaskharabicnormal\', sans-serif; font-size: 10px;">
                         <strong style="color: grey;">ملاحظات التسليم</strong><br>
                         ' . htmlspecialchars($checkin_note ?? '', ENT_QUOTES, 'UTF-8') . '
                     </td>
-                    <td width="33%" style="padding: 5px; text-align: center; font-family: \'aealarabiya\', sans-serif; font-size: 10px;">
-                        <strong>ملاحظات الاستلام</strong><br>
+                    <td width="33%" style="padding: 5px; text-align: center; font-family: \'notonaskharabicnormal\', sans-serif; font-size: 10px;">
+                        <strong style="color: grey;">ملاحظات الاستلام</strong><br>
                         ' . htmlspecialchars($checkout_note ?? '', ENT_QUOTES, 'UTF-8') . '
                     </td>
-                    <td width="34%" style="padding: 5px; text-align: center; font-family: \'aealarabiya\', sans-serif; font-size: 10px;">
-                       ملاحظة الموافقة<br>
+                    <td width="34%" style="padding: 5px; text-align: center; font-family: \'notonaskharabicnormal\', sans-serif; font-size: 10px;">
+                       <strong style="color: grey;">ملاحظة الموافقة</strong><br>
                         ' . htmlspecialchars($acceptance_note ?? '', ENT_QUOTES, 'UTF-8') . '
                     </td>
                 </tr>
@@ -336,6 +336,107 @@ class TcpdfService
         }
     }
     
+    /**
+     * Generate TCPDF content for maintenance notes section and return as base64 image
+     */
+    public function generateMaintenanceNotesTcpdf($maintenance_note)
+    {
+        try {
+            // Create a new TCPDF instance specifically for maintenance notes
+            $notesPdf = new TCPDF('L', 'mm', [200, 30], true, 'UTF-8', false);
+            
+            // Set document information
+            $notesPdf->SetCreator('Snipe-IT');
+            $notesPdf->SetAuthor('Snipe-IT');
+            $notesPdf->SetTitle('Maintenance Notes Section');
+            
+            // Set margins to minimal for notes section
+            $notesPdf->SetMargins(2, 2, 2);
+            $notesPdf->SetHeaderMargin(0);
+            $notesPdf->SetFooterMargin(0);
+            
+            // Disable auto page breaks
+            $notesPdf->SetAutoPageBreak(false, 0);
+            
+            // Set font for Arabic text
+            $notesPdf->SetFont('aealarabiya', '', 10);
+            
+            // Add page
+            $notesPdf->AddPage();
+            
+            // Create HTML content for maintenance notes
+            $notesHtml = '
+            <table width="100%" cellpadding="3" cellspacing="0" border="1">
+                <tr>
+                    <td style="padding: 8px; text-align: center; font-family: \'aealarabiya\', sans-serif; font-size: 10px;">
+                        <strong>ملاحظات الصيانة</strong><br><br>
+                        ' . htmlspecialchars($maintenance_note ?? '', ENT_QUOTES, 'UTF-8') . '
+                    </td>
+                </tr>
+            </table>';
+            
+            // Write HTML content
+            $notesPdf->writeHTML($notesHtml, true, false, true, false, '');
+            
+            // Get the PDF content
+            $pdfContent = $notesPdf->Output('maintenance_notes.pdf', 'S');
+            
+            // Try to convert PDF to image using system command if ImageMagick is available
+            if ($this->isImageMagickAvailable()) {
+                $imageData = $this->convertPdfToImageWithCommand($pdfContent);
+                if ($imageData) {
+                    return $imageData;
+                }
+            }
+            
+            // Try ImageMagick PHP extension
+            if (extension_loaded('imagick')) {
+                try {
+                    $imagick = new \Imagick();
+                    $imagick->setResolution(150, 150);
+                    $imagick->readImageBlob($pdfContent);
+                    $imagick->setImageFormat('png');
+                    $imagick->setImageBackgroundColor('white');
+                    $imagick->setImageAlphaChannel(\Imagick::ALPHACHANNEL_REMOVE);
+                    
+                    $imageData = base64_encode($imagick->getImageBlob());
+                    $imagick->clear();
+                    $imagick->destroy();
+                    
+                    return $imageData;
+                } catch (Exception $e) {
+                    // ImageMagick failed, continue to fallback
+                }
+            }
+            
+            // Fallback: return null to use HTML
+            return null;
+            
+        } catch (Exception $e) {
+            // If TCPDF fails, return null to use fallback HTML
+            return null;
+        }
+    }
+    
+    /**
+     * Generate HTML content for maintenance notes section (fallback method)
+     */
+    public function generateMaintenanceNotesHtml($maintenance_note)
+    {
+        // Create HTML content for maintenance notes with TCPDF-compatible styling
+        $notesHtml = '
+        <table width="100%" cellpadding="2" cellspacing="0" style="border-collapse: collapse;">
+            <tr>
+                <td style="border: 1px solid #000; padding: 5px; text-align: center; font-family: \'aealarabiya\', sans-serif; font-size: 10px;">
+                    <strong>ملاحظات الصيانة</strong><br>
+                    ' . htmlspecialchars($maintenance_note ?? '', ENT_QUOTES, 'UTF-8') . '
+                </td>
+            </tr>
+        </table>';
+        
+        return $notesHtml;
+    }
+
     /**
      * Generate HTML content for notes section (fallback method)
      */
