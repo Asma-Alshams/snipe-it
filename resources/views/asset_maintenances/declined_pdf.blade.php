@@ -4,22 +4,48 @@
     <meta charset="utf-8">
     <title>Periodic Asset Maintenance Checklist - Declined</title>
     <style>
-           @page {
-  margin: 2mm 6mm 2mm 6mm; /* top, right, bottom, left */ size: landscape; }
-        body { font-weight: 500; }
-        h2, h4 { text-align: center; color: #00008B; font-weight: 600; }
-        table { width: 100%; border-collapse: collapse; text-align:right; }
-        th, td { border: 1px solid #333; padding: 5px; }
-        th { color: grey; }
+        @page {
+            margin: 2mm 6mm 2mm 6mm; /* top, right, bottom, left */ 
+            size: landscape; 
+        }
+        body { 
+            font-family: 'aealarabiya', sans-serif;
+            font-weight: 500; 
+            text-align: center;
+        }
+       h1 { 
+            text-align: center; 
+            color: #00008B; 
+            font-weight: 600;
+            font-family: 'aealarabiya', sans-serif;
+        }
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            text-align:right;
+            padding: 3px;
+        }
+        .tdata {
+            font-family: 'notonaskharabicnormal', sans-serif;
+            border: 1px solid #333; 
+            font-size: 9px;
+        }
+        .thead {
+            font-family: 'aealarabiya', sans-serif;
+            border: 1px solid #333; 
+            color: grey;
+            font-size: 13px;
+            padding: 5px; 
+        }
     </style>
-    @if ($logo ?? false)
-        <center>
-            <img width="90%" src="{{ $logo }}">
-        </center>
-    @endif
 </head>
 <body>
-    <h2>قائمة الصيانة المرفوضة</h2>
+    @if ($logo ?? false)
+        <center>
+            <img src="{{ $logo }}" alt="Logo" class="logo" style="width: 700px;"/>
+        </center>
+    @endif
+    <h1>قائمة الصيانة المرفوضة</h1>
     @if(isset($filter) && $start_date && $end_date)
         @if($filter === 'declined')
             <p style="text-align:center;">من: {{ $start_date }} الى {{ $end_date }}</p>
@@ -28,23 +54,23 @@
     <table>
         <thead>
             <tr>
-                <th>التوقيع</th>
-                <th>ملاحظات <br>الرفض</th>
-                <th>مستوى <br>الخطر</th>
-                <th>حالة <br>الصيانة</th>
-                <th>نوع <br>الصيانة</th>
-                <th> اعد<br>من قبل</th>
-                <th>صاحب الأصل</th>
-                <th>الأصل</th>
-                <th>القسم</th>
-                <th>#</th>
+                <th class="thead">التوقيع</th>
+                <th class="thead">ملاحظات  الرفض</th>
+                <th class="thead">مستوى الخطر</th>
+                <th class="thead">حالة الصيانة</th>
+                <th class="thead">نوع الصيانة</th>
+                <!-- <th> اعد من قبل</th> -->
+                <th class="thead">صاحب الأصل</th>
+                <th class="thead">الاصل</th>
+                <th class="thead">القسم</th>
+                <!-- <th>#</th> -->
                
             </tr>
         </thead>
         <tbody>
             @foreach($maintenances as $m)
                 <tr>
-                    <td>
+                    <td class="tdata">
                         @php
                             $acceptance = $m->maintenanceAcceptances->first();
                             $signature = $acceptance && $acceptance->signature_filename
@@ -52,24 +78,24 @@
                                 : null;
                         @endphp
                         @if($signature)
-                            <img src="{{ $signature }}" alt="Signature" style="max-width:200px;" />
+                            <img src="{{ $signature }}" alt="Signature" style="width:200px;" />
                         @else
                             -
                         @endif
                     </td>
-                    <td>
+                    <td class="tdata">
                         @php
                             $acceptance = $m->maintenanceAcceptances->first();
                         @endphp
                         {{ $acceptance->note ?? '-' }}
                     </td>
-                    <td>{{ ucfirst($m->risk_level ?? '-') }}</td>
-                    <td>{{ $m->maintenanceStatus ?? '-' }}</td>
+                    <td class="tdata">{{ ucfirst($m->risk_level ?? '-') }}</td>
+                    <td class="tdata">{{ $m->maintenanceStatus ?? '-' }}</td>
                     
-                    <td>{{ $m->asset_maintenance_type ?? '-' }}</td>
-                    <td>{{ $m->adminuser ? $m->adminuser->present()->name() : '-' }}</td>
+                    <td class="tdata">{{ $m->asset_maintenance_type ?? '-' }}</td>
+                    <!-- <td>{{ $m->adminuser ? $m->adminuser->present()->name() : '-' }}</td> -->
                    
-                    <td>
+                    <td class="tdata">
                         @php
                             $acceptance = $m->maintenanceAcceptances->first();
                             $originalUser = $acceptance ? \App\Models\User::find($acceptance->assigned_to_id) : null;
@@ -84,7 +110,7 @@
                             -
                         @endif
                     </td>
-                    <td>
+                    <td class="tdata">
                         @if($m->asset)
                             {{ $m->asset->name ?? '-' }} <br> ({{ $m->asset->asset_tag ?? '-' }}) {{ $m->asset->model->name ?? '-' }}@if($m->assignedUser)
                                 <br> -> {{ method_exists($m->assignedUser, 'present') && $m->assignedUser->present() ? $m->assignedUser->present()->fullName() : trim(($m->assignedUser->first_name ?? '') . ' ' . ($m->assignedUser->last_name ?? '')) }}
@@ -93,8 +119,8 @@
                             -
                         @endif
                      </td>
-                    <td>{{ $originalUser && $originalUser->department ? $originalUser->department->name : '-' }}</td>
-                    <td>{{ $m->id }}</td>
+                    <td class="tdata">{{ $originalUser && $originalUser->department ? $originalUser->department->name : '-' }}</td>
+                    <!-- <td>{{ $m->id }}</td> -->
                     
                 </tr>
             @endforeach

@@ -11,17 +11,16 @@
         .header {
             text-align: center;
             font-weight: bold;
-            font-family: 'notonaskharabicb';
+            font-family: 'aealarabiya';
         }
         h1 { 
             color: #00008B; 
-            font-size: 18px; 
             font-weight: heavy;
         }
         .subtitle {
-            font-size: 12px;
+            font-size: 11px;
             color: #333;
-            font-family: 'notonaskharabicnormal';
+            font-family: 'aealarabiya';
         }
         table { 
             width: 100%; 
@@ -34,8 +33,8 @@
             border: 1px solid #333; 
             text-align: center;
             font-weight: bold;
-            font-family: 'notonaskharabicb';
-            font-size: 11px;
+            font-family: 'aealarabiya';
+            font-size: 14px;
         }
         td { 
             border: 1px solid #333; 
@@ -63,7 +62,7 @@
 <body>
     <div class="header">
         @if (!empty($logo))
-            <img src="{{ $logo }}" alt="Logo" class="logo" style="width: 800px;"/>   
+            <img src="{{ $logo }}" alt="Logo" class="logo" style="width: 500px;"/>   
         @endif
         <h1>سجل الأصول</h1>
         
@@ -125,7 +124,7 @@
     </table>
     <br>
     <div class="footer">
-        Generated on {{ date('Y-m-d H:i') }}
+        Generated on {{ date('Y-m-d') }}
     </div>
 </body>
 </html> 

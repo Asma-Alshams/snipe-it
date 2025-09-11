@@ -4,29 +4,53 @@
     <meta charset="utf-8">
     <title>Asset Maintenance Report</title>
     <style>
-        body {  font-weight: 500;}
-        h2, h4 { text-align: center; color: #00008B; font-weight: 600;}
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #333; padding: 4px; text-align: right; }
-        td { color: grey; }
-        @page {
-            margin: 2mm 12mm 2mm 12mm;}
-    </style>
-     
-@if ($logo)
-    <center>
-        <img  width="100%" src="{{ $logo }}">
-    </center>
-@endif
+        body { 
+            font-weight: 500;
+            font-family: 'aealarabiya', sans-serif;
+        }
+        h2, h4 { 
+            text-align: center; 
+            color: #00008B; 
+            font-weight: 600;
+            font-family: 'aealarabiya', sans-serif;
+        }
+        table { 
+            border-collapse: collapse; 
+            margin-top: 20px; 
+            text-align: right; 
+            padding: 7px;
+        }
+        th {
+            font-family: 'notonaskharabicnormal', sans-serif;
+            border: 1px solid #333; 
+            width: 75%;
+        }
+        .thead {
+            border: 1px solid #333; 
+            color: grey;
+            font-family: 'aealarabiya', sans-serif;
+            color: grey;
+            font-size: 14px;
+            width: 25%;
+        }
 
+        @page {
+            margin: 2mm 12mm 2mm 12mm;
+        }
+    </style>
 </head>
 <body>
+    @if ($logo)
+        <center>
+            <img src="{{ $logo }}" alt="Logo" class="logo" style="width: 800px;"/>
+        </center>
+    @endif
     <h2>تقرير صيانة قسم الدعم التقني </h2>
-    <h4>تقرير #{{ $maintenance->id }}</h4>
+    <!-- <h4>تقرير #{{ $maintenance->id }}</h4> -->
     <table>
         <tr>
             <th>{{ $maintenance->title }} </th>
-            <td> عنوان الصيانة </td>
+            <td class="thead"> عنوان الصيانة </td>
         </tr>
         <tr>
             <th>
@@ -43,11 +67,11 @@
                     -
                 @endif
             </th>
-            <td>   الأصل</td>
+            <td class="thead"> الأصل</td>
         </tr>
         <tr>
             <th> {{ $maintenance->asset_maintenance_type ?? '-' }}</th>
-            <td>النوع</td>
+            <td class="thead">النوع</td>
         </tr>
         <!-- <tr>
             <th> {{ $maintenance->supplier && $maintenance->supplier->name ? $maintenance->supplier->name : '-' }}</th>
@@ -60,34 +84,34 @@
 
         <tr>
             <th> {{ $maintenance->cost ?? '-' }} </th>
-            <td>التكلفة</td>
+            <td class="thead">التكلفة</td>
         </tr>
         <tr>
             <th>{{ $maintenance->start_date ?? '-' }} </th>
-            <td>تاريخ البدأ</td>
+            <td class="thead">تاريخ البدأ</td>
         </tr>
         <tr>
             <th> {{ $maintenance->completion_date ?? '-' }}</th>
-            <td>تاريخ الأنتهاء</td>
+            <td class="thead">تاريخ الأنتهاء</td>
         </tr>
         <tr>
             <th> {{ $maintenance->repair_method ?? '-' }}</th>
-            <td>طريقة التصليح</td>
+            <td class="thead">طريقة التصليح</td>
         </tr>
         <tr>
             <th> {{ ucfirst($maintenance->risk_level ?? '-') }}</th>
-            <td>مستوى الخطر</td>
+            <td class="thead">مستوى الخطر</td>
         </tr>
         <tr>
             <th> {{ $maintenanceStatus ?? '-' }}</th>
-            <td>حالة الصيانة</td>
+            <td class="thead">حالة الصيانة</td>
         </tr>
         <tr>
             <th> @php
                             $acceptance = $maintenance->maintenanceAcceptances->first();
                         @endphp
                         {{ $acceptance->note ?? '-' }}</th>
-            <td>الملاحظات</td>
+            <td class="thead">الملاحظات</td>
         </tr>
    
        
@@ -103,12 +127,11 @@
                 @else
                     -
                 @endif </th>
-            <td>توقيع صاحب الأصل</td>
+            <td class="thead">توقيع صاحب الأصل</td>
         </tr>
     </table>
     <p style="margin-top:40px; text-align:center;">
-        التقرير اعد من قبل {{ $createdByName }}<br>
-        بتاريخ {{ date('Y-m-d ') }}
+        تاريخ {{ date('Y-m-d ') }}
     </p>
 </body>
 </html> 

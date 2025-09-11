@@ -229,19 +229,35 @@ class AssetMaintenancesController extends Controller
     }
 
     /**
-     * Helper to generate PDF using Gpdf with proper options for Arabic/RTL support.
+     * Helper to generate PDF using TCPDF with proper options for Arabic/RTL support.
      *
      * @param string $viewRoute
      * @param array $data
+     * @param bool $landscape
      * @return string
      */
-    private function generatePdfWithGpdf(string $viewRoute, array $data): string
+    private function generatePdfWithTcpdf(string $viewRoute, array $data, bool $landscape = false): string
     {
         $html = view($viewRoute, $data)->render();
-        return GpdfFacade::generate($html, [
-            'mode' => 'utf-8',
-            'default_font' => 'dejavusans',
-        ]);
+        
+        // Use the TCPDF service with Arabic font support
+        if ($landscape) {
+            $pdfService = \App\Services\TcpdfService::createForLandscapeReport('Maintenance Report', 'Asset Maintenance Report');
+        } else {
+            $pdfService = \App\Services\TcpdfService::createForReport('Maintenance Report', 'Asset Maintenance Report');
+        }
+        
+        if ($landscape) {
+            $pdfService->addLandscapePage()
+                       ->setFont('notonaskharabicnormal', '', 12)
+                       ->writeHtml($html);
+        } else {
+            $pdfService->addPage()
+                       ->setFont('notonaskharabicnormal', '', 12)
+                       ->writeHtml($html);
+        }
+        
+        return $pdfService->output('maintenance-report.pdf', 'S');
     }
 
     /**
@@ -280,7 +296,7 @@ class AssetMaintenancesController extends Controller
         $macAddress = $maintenance->asset ? $maintenance->asset->getAttribute('_snipeit_mac_address_1') : null;
         $maintenanceStatus = self::getMaintenanceStatus($maintenance);
         
-        $pdfContent = $this->generatePdfWithGpdf('asset_maintenances.pdf', [
+        $pdfContent = $this->generatePdfWithTcpdf('asset_maintenances.pdf', [
 'maintenance' => $maintenance,
             'assetMaintenance' => $maintenance,
             'createdByName' => $userName,
@@ -356,7 +372,7 @@ class AssetMaintenancesController extends Controller
         } else {
             $user = (object)[ 'userloc' => (object)['name' => '-'] ];
         }
-        $pdfContent = $this->generatePdfWithGpdf('asset_maintenances.pdf', [
+        $pdfContent = $this->generatePdfWithTcpdf('asset_maintenances.pdf', [
             'maintenance' => $maintenance,
             'logo' => $logo,
             'item_serial' => $item_serial,
@@ -450,11 +466,7 @@ class AssetMaintenancesController extends Controller
             'start_date' => $request->input('start_date'),
             'end_date' => $request->input('end_date'),
         ];
-        $html = view('asset_maintenances.recent_pdf', $data)->render();
-        $pdfContent = \Omaralalwi\Gpdf\Facade\Gpdf::generate($html, [
-            'mode' => 'utf-8',
-            'default_font' => 'dejavusans',
-        ]);
+        $pdfContent = $this->generatePdfWithTcpdf('asset_maintenances.recent_pdf', $data, true);
         $filename = 'all-maintenance-report-' . date('Y-m-d-his') . '.pdf';
         return response($pdfContent, 200, [
             'Content-Type' => 'application/pdf',
@@ -606,11 +618,7 @@ class AssetMaintenancesController extends Controller
             'start_date' => $request->input('start_date'),
             'end_date' => $request->input('end_date'),
         ];
-        $html = view('asset_maintenances.declined_pdf', $data)->render();
-        $pdfContent = \Omaralalwi\Gpdf\Facade\Gpdf::generate($html, [
-            'mode' => 'utf-8',
-            'default_font' => 'dejavusans',
-        ]);
+        $pdfContent = $this->generatePdfWithTcpdf('asset_maintenances.declined_pdf', $data, true);
         $filename = 'declined-maintenance-report-' . date('Y-m-d-his') . '.pdf';
         return response($pdfContent, 200, [
             'Content-Type' => 'application/pdf',

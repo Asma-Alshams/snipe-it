@@ -29,7 +29,7 @@ class TcpdfService
         $this->pdf->SetSubject('Generated Report');
         
         // Set default margins
-        $this->pdf->SetMargins(15, 15, 15);
+        $this->pdf->SetMargins(7, 7, 7);
         $this->pdf->SetHeaderMargin(5);
         $this->pdf->SetFooterMargin(10);
         
@@ -195,6 +195,44 @@ class TcpdfService
         $service->setTitle($title);
         $service->setSubject($subject);
         return $service;
+    }
+
+    /**
+     * Create a new instance for a specific report with landscape orientation
+     */
+    public static function createForLandscapeReport($title = 'Report', $subject = 'Generated Report')
+    {
+        $service = new self();
+        $service->setTitle($title);
+        $service->setSubject($subject);
+        
+        return $service;
+    }
+
+    /**
+     * Add a new page with landscape orientation
+     */
+    public function addLandscapePage()
+    {
+        $this->pdf->AddPage('L');
+        return $this;
+    }
+
+    /**
+     * Set up dual fonts for maintenance reports (aealarabiya and notonaskharabic)
+     */
+    public function setMaintenanceFonts()
+    {
+        // Don't set a default font - let CSS control the fonts
+        // Just ensure both fonts are available for CSS selection
+        $this->pdf->SetFont('notonaskharabicnormal', '', 12);
+        $this->pdf->SetFont('notonaskharabicb', '', 12);
+        $this->pdf->SetFont('aealarabiya', '', 12);
+        
+        // Set back to notonaskharabicnormal as default for maintenance reports
+        $this->pdf->SetFont('notonaskharabicnormal', '', 12);
+        
+        return $this;
     }
 
     /**
