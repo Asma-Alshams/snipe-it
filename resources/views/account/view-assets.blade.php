@@ -481,7 +481,7 @@
                       @foreach ($field_array as $db_column => $field_name)
                         <th class="col-md-1" data-switchable="true" data-visible="true">{{ $field_name }}</th>
                       @endforeach
-                      <th class="col-md-2" data-switchable="true" data-visible="true">
+                      <th class="col-md-2" data-switchable="false" data-visible="true">
                         {{ trans('general.comments') }}
                       </th>
 

@@ -76,10 +76,10 @@
     </tr>
     <tr>
         <td class="label">   تاريخ الطلب   </td>
-        <td class="label">  مكان مقدم الطلب   </td>
+        <td class="label">  رقم المكتب /المبنى </td>
     </tr>
     <tr>
-        <td>   {{ date($date_settings) }} </td>
+        <td> {{ date($date_settings) }} </td>
         <td> {{ $user->userloc->name ?? '' }} </td>
     </tr>
     <tr>
@@ -92,7 +92,7 @@
     </tr> 
     <tr><td colspan="2" style="padding-top: 20px;"> <br> </td></tr>
     <tr class="label0">
-        <td colspan="2">  نوع الجهاز  </td>
+        <td colspan="2"> بيانات الجهاز  </td>
     </tr>
     <tr>
         <td class="label">  ماركة الجهاز   </td>
