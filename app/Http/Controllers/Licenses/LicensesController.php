@@ -8,6 +8,7 @@ use App\Models\Company;
 use App\Models\License;
 use App\Models\LicenseSeat;
 use App\Models\User;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -476,6 +477,8 @@ class LicensesController extends Controller
 
     /**
      * Update the expiration date of a license.
+     * Allows users who can access the View Assets page to update expiration dates
+     * for licenses assigned to them or their subordinates.
      *
      * @param Request $request
      * @param License $license
@@ -484,7 +487,13 @@ class LicensesController extends Controller
      */
     public function updateExpiration(Request $request, License $license)
     {
-        $this->authorize('update', $license);
+        // Check if user has general license edit permission (admins, etc.)
+        if (auth()->user()->hasAccess('licenses.edit')) {
+            $this->authorize('update', $license);
+        } else {
+            // For regular users, check if they can access this license through View Assets page
+            $this->authorizeViewAssetsAccess($license);
+        }
 
         $request->validate([
             'expiration_date' => 'nullable|date_format:Y-m-d'
@@ -495,5 +504,36 @@ class LicensesController extends Controller
         ]);
 
         return redirect()->back()->with('success', trans('admin/licenses/message.update.success'));
+    }
+
+    /**
+     * Authorize users who can access the View Assets page to update license expiration dates.
+     * This allows users to update expiration dates for licenses assigned to them or their subordinates.
+     *
+     * @param License $license
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
+    private function authorizeViewAssetsAccess(License $license)
+    {
+        $user = auth()->user();
+        
+        // Super users can always update
+        if ($user->isSuperUser()) {
+            return;
+        }
+        
+        // Check if the license is assigned to the current user
+        if ($license->assignedusers()->where('users.id', $user->id)->exists()) {
+            return;
+        }
+        
+        // Check if the license is assigned to any of the user's subordinates (manager view)
+        $subordinates = $user->getAllSubordinates();
+        if ($subordinates->isNotEmpty() && $license->assignedusers()->whereIn('users.id', $subordinates->pluck('id'))->exists()) {
+            return;
+        }
+        
+        // If none of the above conditions are met, deny access
+        throw new \Illuminate\Auth\Access\AuthorizationException('You are not authorized to update this license expiration date.');
     }
 }

@@ -664,16 +664,22 @@
                       @endif
                     </td>
                     <td>
-                      <button type="button" 
-                              class="btn btn-primary btn-sm" 
-                              data-toggle="modal" 
-                              data-target="#updateExpirationModal" 
-                              data-license-id="{{ $license->id }}"
-                              data-license-name="{{ $license->name }}"
-                              data-expiration-date="{{ $license->expiration_date ? $license->expiration_date->format('Y-m-d') : '' }}"
-                              title="{{ trans('general.update') }}">
-                        <i class="fas fa-edit"></i>
-                      </button>
+                      @if(auth()->user()->hasAccess('licenses.edit') || 
+                          $license->assignedusers()->where('users.id', auth()->id())->exists() ||
+                          (auth()->user()->getAllSubordinates()->isNotEmpty() && $license->assignedusers()->whereIn('users.id', auth()->user()->getAllSubordinates()->pluck('id'))->exists()))
+                        <button type="button" 
+                                class="btn btn-primary btn-sm" 
+                                data-toggle="modal" 
+                                data-target="#updateExpirationModal" 
+                                data-license-id="{{ $license->id }}"
+                                data-license-name="{{ $license->name }}"
+                                data-expiration-date="{{ $license->expiration_date ? $license->expiration_date->format('Y-m-d') : '' }}"
+                                title="{{ trans('general.update') }}">
+                          <i class="fas fa-edit"></i>
+                        </button>
+                      @else
+                        <span class="text-muted">-</span>
+                      @endif
                     </td>
                   </tr>
                 @endforeach
