@@ -168,6 +168,9 @@ class ActionlogsTransformer
                 'type' => e($actionlog->itemType()),
                 'serial' =>e($actionlog->item->serial) ? e($actionlog->item->serial) : null
             ] : null,
+            'asset_name' => ($actionlog->item && $actionlog->itemType() == 'asset') ? e($actionlog->item->name) : null,
+            'asset_tag' => ($actionlog->item && $actionlog->itemType() == 'asset') ? e($actionlog->item->asset_tag) : null,
+            'model_name' => ($actionlog->item && $actionlog->itemType() == 'asset' && $actionlog->item->model) ? e($actionlog->item->model->name) : null,
             'location' => ($actionlog->location) ? [
                 'id' => (int) $actionlog->location->id,
                 'name' => e($actionlog->location->name),

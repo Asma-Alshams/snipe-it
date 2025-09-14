@@ -587,6 +587,22 @@
         }
     }
 
+    // Asset name formatter for audit reports
+    function assetNameFormatter(value, row) {
+        if (value) {
+            return '<a href="{{ config('app.url') }}/hardware/' + row.item.id + '" data-tooltip="true" title="asset"><i class="fas fa-barcode text-blue"></i> ' + value + '</a>';
+        }
+        return '';
+    }
+
+    // Asset tag formatter for audit reports
+    function assetTagFormatter(value, row) {
+        if (value) {
+            return '<code>' + value + '</code>';
+        }
+        return '';
+    }
+
 
     // Convert line breaks to <br>
     function notesFormatter(value) {

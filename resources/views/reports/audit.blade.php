@@ -31,7 +31,9 @@
                         <tr>
                             <th class="col-sm-1" data-field="file" data-visible="false" data-formatter="auditImageFormatter">{{ trans('admin/hardware/table.image') }}</th>
                             <th class="col-sm-2" data-field="created_by" data-sortable="true" data-searchable="true" data-formatter="usersLinkObjFormatter">{{ trans('general.created_by') }}</th>
-                            <th class="col-sm-2" data-field="item" data-sortable="true" data-searchable="true" data-formatter="polymorphicItemFormatter">{{ trans('general.item') }}</th>
+                            <th class="col-sm-1" data-field="asset_name" data-sortable="true" data-searchable="true" data-formatter="assetNameFormatter">{{ trans('admin/hardware/form.name') }}</th>
+                            <th class="col-sm-1" data-field="asset_tag" data-sortable="true" data-searchable="true" data-formatter="assetTagFormatter">{{ trans('admin/hardware/table.asset_tag') }}</th>
+                            <th class="col-sm-1" data-field="model_name" data-sortable="true" data-searchable="true">{{ trans('admin/hardware/form.model') }}</th>
                             <th class="col-sm-1" data-field="location" data-sortable="true" data-searchable="true" data-formatter="locationsLinkObjFormatter">{{ trans('general.location') }}</th>
                             <th class="col-sm-2" data-field="created_at" data-formatter="dateDisplayFormatter" data-sortable="true" data-searchable="true">{{ trans('general.last_audit') }}</th>
                             <th class="col-sm-2" data-field="next_audit_date" data-formatter="dateDisplayFormatter">{{ trans('general.next_audit_date') }}</th>
