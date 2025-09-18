@@ -46,12 +46,12 @@
         </center>
     @endif
     @if(isset($filter) && ($filter === 'all' || $filter === 'created_at'))
-        <h1 style='font-size: 16px;'>قائمة جميع الصيانات </h1>
+        <h1>قائمة جميع الصيانات </h1>
     @else
-        <h2>قائمة الصيانة الدورية للأجهزة المحمولة واللوحية 
+        <h1>قائمة الصيانة الدورية للأجهزة المحمولة واللوحية 
             <br>
             لموظفين الامانة العامة
-        </h2>
+        </h1>
     @endif
     @if(isset($filter) && $start_date && $end_date)
         @if($filter === 'created_at')
