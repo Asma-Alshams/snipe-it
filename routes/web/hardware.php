@@ -185,6 +185,9 @@ Route::group(
             [BulkAssetsController::class, 'storeCheckout']
         )->name('hardware.bulkcheckout.store');
 
+        // Hardware PDF Report
+        Route::get('pdf', [AssetsController::class, 'exportPdf'])->name('hardware.pdf');
+
     });
 
 Route::resource('hardware',

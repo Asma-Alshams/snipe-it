@@ -49,7 +49,12 @@
   @can('create', \App\Models\Asset::class)
   <a href="{{ route('hardware.create') }}" {{$snipeSettings->shortcuts_enabled == 1 ? "n" : ''}} class="btn btn-primary pull-right"></i> {{ trans('general.create') }}</a>
   @endcan
-
+  
+ @can('view', \App\Models\Asset::class)
+    <button type="button" class="btn btn-primary pull-right text-white" style="margin-right: 10px;" data-toggle="modal" data-target="#hardwareReportModal">
+      <i class="fas fa-file-pdf"></i> Generate Report
+    </button>
+  @endcan
 @stop
 
 {{-- Page content --}}
@@ -101,5 +106,64 @@
 
 @section('moar_scripts')
 @include('partials.bootstrap-table')
+
+<script>
+  (function() {
+    var initSelects = function() {
+      try {
+        $('#report_user_id, #report_location_id').select2({
+          width: '100%',
+          allowClear: true
+        });
+      } catch(e) {}
+    };
+    $('#hardwareReportModal').on('shown.bs.modal', initSelects);
+    if ($('#hardwareReportModal').is(':visible')) { initSelects(); }
+  })();
+</script>
+
+<!-- Hardware Report Modal -->
+<div class="modal fade" id="hardwareReportModal" tabindex="-1" role="dialog" aria-labelledby="hardwareReportModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title" id="hardwareReportModalLabel">Generate Hardware Report</h4>
+      </div>
+      <div class="modal-body">
+        <form id="hardwareReportForm" method="GET" action="{{ route('hardware.pdf') }}">
+          <div class="form-group">
+            <label for="report_user_id">Filter by User (optional)</label>
+            <select class="form-control select2" name="user_id" id="report_user_id" data-placeholder="-- Any User --">
+              <option value="">-- Any User --</option>
+              @foreach(($users ?? []) as $u)
+                <option value="{{ $u->id }}">{{ trim(($u->first_name ?? '').' '.($u->last_name ?? '')) }}</option>
+              @endforeach
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="report_location_id">Filter by Location (optional)</label>
+            <select class="form-control select2" name="location_id" id="report_location_id" data-placeholder="-- Any Location --">
+              <option value="">-- Any Location --</option>
+              @foreach(($locations ?? []) as $loc)
+                <option value="{{ $loc->id }}">{{ $loc->name }}</option>
+              @endforeach
+            </select>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-success text-white" style="margin-right:10px;"
+                onclick="window.location.href='{{ route('hardware.pdf') }}'">
+          <i class="fas fa-print"></i> Print Full Report
+        </button>
+        <button type="submit" form="hardwareReportForm" class="btn btn-primary">Generate Report</button>
+      </div>
+    </div>
+  </div>
+  </div>
 
 @stop

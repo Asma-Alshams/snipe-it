@@ -65,8 +65,13 @@ class AssetsController extends Controller
     {
         $this->authorize('index', Asset::class);
         $company = Company::find($request->input('company_id'));
+        $users = User::orderBy('first_name')->orderBy('last_name')->get(['id', 'first_name', 'last_name']);
+        $locations = Location::orderBy('name')->get(['id', 'name']);
 
-        return view('hardware/index')->with('company', $company);
+        return view('hardware/index')
+            ->with('company', $company)
+            ->with('users', $users)
+            ->with('locations', $locations);
     }
 
     /**
@@ -1020,5 +1025,81 @@ class AssetsController extends Controller
         $requestedItems = $requestedItems->orderBy('created_at', 'desc')->get();
 
         return view('hardware/requested', compact('requestedItems'));
+    }
+
+    /**
+     * Export hardware (assets) as a PDF report.
+     * Supports optional filtering by assigned user and by location.
+     */
+    public function exportPdf(Request $request)
+    {
+        $this->authorize('view', Asset::class);
+
+        $assetsQuery = Asset::with([
+            'company',
+            'model',
+            'model.manufacturer',
+            'model.category',
+            'supplier',
+            'adminuser',
+            'location',
+            'assignedTo',
+            'defaultLoc',
+        ])->orderBy('created_at', 'desc');
+
+        // Apply company scope
+        Company::scopeCompanyables($assetsQuery);
+
+        // Filter by assigned user (show assets currently assigned to the given user)
+        if ($request->filled('user_id')) {
+            $userId = (int) $request->input('user_id');
+            $assetsQuery->whereNotNull('assigned_to')
+                ->whereHasMorph('assignedTo', [User::class], function ($q) use ($userId) {
+                    $q->withTrashed()->where('users.id', '=', $userId);
+                });
+        }
+
+        // Filter by location (show assets in that location OR checked out to that location)
+        if ($request->filled('location_id')) {
+            $locId = (int) $request->input('location_id');
+            $assetsQuery->where(function($q) use ($locId) {
+                $q->where('location_id', $locId)  // Assets physically in this location
+                  ->orWhere(function($subQ) use ($locId) {
+                      // Assets checked out to this location
+                      $subQ->where('assigned_type', '=', Location::class)
+                           ->where('assigned_to', '=', $locId);
+                  });
+            });
+        }
+
+        $assets = $assetsQuery->get();
+
+        // Branding/logo
+        $branding_settings = \App\Http\Controllers\SettingsController::getPDFBranding();
+        $logo = '';
+        if (!is_null($branding_settings->acceptance_pdf_logo)) {
+            $logo = public_path() . '/uploads/' . $branding_settings->acceptance_pdf_logo;
+        } elseif (!is_null($branding_settings->logo)) {
+            $logo = public_path() . '/uploads/' . $branding_settings->logo;
+        }
+
+        $data = [
+            'assets' => $assets,
+            'logo' => $logo,
+            'user_id' => $request->input('user_id'),
+            'location_id' => $request->input('location_id'),
+        ];
+
+        $html = view('hardware.report_pdf', $data)->render();
+        $pdfContent = GpdfFacade::generate($html, [
+            'mode' => 'utf-8',
+            'default_font' => 'dejavusans',
+        ]);
+        $filename = 'hardware-report-' . date('Y-m-d-his') . '.pdf';
+
+        return response($pdfContent, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"'
+        ]);
     }
 }
