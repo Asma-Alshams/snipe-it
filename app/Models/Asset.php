@@ -351,16 +351,24 @@ class Asset extends Depreciable
 
         $this->assignedTo()->associate($target);
 
+        \Log::debug('checkOut method - location parameter: ' . ($location ?? 'null'));
+        \Log::debug('checkOut method - target location: ' . ($target->location_id ?? 'null'));
+        
         if ($location != null) {
             $this->location_id = $location;
+            \Log::debug('checkOut method - using override location: ' . $location);
         } else {
             if (isset($target->location)) {
                 $this->location_id = $target->location->id;
+                \Log::debug('checkOut method - using target location: ' . $target->location->id);
             }
             if ($target instanceof Location) {
                 $this->location_id = $target->id;
+                \Log::debug('checkOut method - using target ID: ' . $target->id);
             }
         }
+        
+        \Log::debug('checkOut method - final location_id: ' . $this->location_id);
 
         $originalValues = $this->getRawOriginal();
 

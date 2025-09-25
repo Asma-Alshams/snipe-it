@@ -97,6 +97,24 @@
 
                         @include ('partials.forms.edit.user-select', ['translated_name' => trans('general.user'), 'fieldname' => 'assigned_user'])
 
+                        <!-- Location Override for User Checkout -->
+                        <div class="form-group" id="location_override_group" style="display:none;">
+                            <label for="location_override" class="col-md-3 control-label">
+                                {{ trans('admin/hardware/form.location_override') }}
+                                <i class="fas fa-info-circle" data-toggle="tooltip" title="{{ trans('admin/hardware/form.location_override_help') }}"></i>
+                            </label>
+                            <div class="col-md-7">
+                                <select class="js-data-ajax" data-endpoint="locations" data-placeholder="{{ trans('general.select_location') }}" name="location_override" style="width: 100%" id="location_override_location_select" aria-label="location_override">
+                                    <option value="">{{ trans('general.select_location') }}</option>
+                                </select>
+                            </div>
+                            <div class="col-md-1 col-sm-1 text-left">
+                                @can('create', \App\Models\Location::class)
+                                    <a href='{{ route('modal.show', 'location') }}' data-toggle="modal" data-target="#createModal" data-select='location_override_location_select' class="btn btn-sm btn-primary">{{ trans('button.new') }}</a>
+                                @endcan
+                            </div>
+                        </div>
+
                         <!-- We have to pass unselect here so that we don't default to the asset that's being checked out. We want that asset to be pre-selected everywhere else. -->
                         @include ('partials.forms.edit.asset-select', ['translated_name' => trans('general.asset'), 'fieldname' => 'assigned_asset', 'unselect' => 'true', 'style' => 'display:none;'])
 
@@ -222,4 +240,26 @@
 
 @section('moar_scripts')
     @include('partials/assets-assigned')
+    
+    <script>
+        $(document).ready(function() {
+            // Show/hide location override field based on checkout type
+            function toggleLocationOverride() {
+                var checkoutType = $('input[name="checkout_to_type"]:checked').val();
+                if (checkoutType === 'user') {
+                    $('#location_override_group').show();
+                } else {
+                    $('#location_override_group').hide();
+                }
+            }
+            
+            // Initial state
+            toggleLocationOverride();
+            
+            // Toggle on radio button change
+            $('input[name="checkout_to_type"]').change(function() {
+                toggleLocationOverride();
+            });
+        });
+    </script>
 @stop

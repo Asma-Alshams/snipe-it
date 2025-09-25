@@ -80,7 +80,7 @@
     </tr>
     <tr>
         <td> {{ date($date_settings) }} </td>
-        <td> {{ $user->userloc->name ?? '' }} </td>
+        <td> {{ $asset->location->name ?? '' }} </td>
     </tr>
     <tr>
         <td class="label"> تاريخ المتوقع تسليمه </td>

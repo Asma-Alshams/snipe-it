@@ -122,7 +122,21 @@ class AssetCheckoutController extends Controller
 
             session()->put(['redirect_option' => $request->get('redirect_option'), 'checkout_to_type' => $request->get('checkout_to_type')]);
 
-            if ($asset->checkOut($target, $admin, $checkout_at, $expected_checkin, $request->get('note'), $request->get('name'))) {
+            // Debug all request data
+            \Log::debug('All request data: ' . json_encode($request->all()));
+            
+            // Pass location override if provided for user checkout
+            $location_override = null;
+            if (request('checkout_to_type') === 'user' && request('location_override')) {
+                $location_override = request('location_override');
+                \Log::debug('Location override provided: ' . $location_override);
+            }
+            
+            \Log::debug('Checkout type: ' . request('checkout_to_type'));
+            \Log::debug('Location override: ' . ($location_override ?? 'null'));
+            \Log::debug('Target location: ' . ($target->location_id ?? 'null'));
+            
+            if ($asset->checkOut($target, $admin, $checkout_at, $expected_checkin, $request->get('note'), $request->get('name'), $location_override)) {
                 return Helper::getRedirectOption($request, $asset->id, 'Assets')
                     ->with('success', trans('admin/hardware/message.checkout.success'));
             }

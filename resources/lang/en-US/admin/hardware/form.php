@@ -30,6 +30,8 @@ return [
     'expires'			=> 'Expires',
     'fully_depreciated'	=> 'Fully Depreciated',
     'help_checkout'		=> 'If you wish to assign this asset immediately, select "Ready to Deploy" from the status list above. ',
+    'location_override'	=> 'Override Location',
+    'location_override_help' => 'Override the user\'s default location with a different physical location for this asset.',
     'mac_address'		=> 'MAC Address',
     'manufacturer'		=> 'Manufacturer',
     'model'				=> 'Model',

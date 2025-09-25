@@ -134,11 +134,15 @@ class AssetImporter extends ItemImporter
 
         $item = $this->sanitizeItemForStoring($asset, $editingAsset);
 
-        // The location id fetched by the csv reader is actually the rtd_location_id.
-        // This will also set location_id, but then that will be overridden by the
-        // checkout method if necessary below.
+        // The location id fetched by the csv reader should be the current physical location (location_id).
+        // The rtd_location_id will be set from the user's location if they are assigned.
         if (isset($this->item['location_id'])) {
-            $item['rtd_location_id'] = $this->item['location_id'];
+            $item['location_id'] = $this->item['location_id'];
+        }
+        
+        // For both create and update: Set rtd_location_id from user's location if they are assigned
+        if (isset($target) && $target instanceof \App\Models\User && $target->location_id) {
+            $item['rtd_location_id'] = $target->location_id;
         }
 
 
@@ -207,7 +211,17 @@ class AssetImporter extends ItemImporter
                     }
                 }
 
-                $asset->fresh()->checkOut($target, $this->created_by, $checkout_date, null, 'Checkout from CSV Importer',  $asset->name);
+                // Checkout the asset to the target with location override
+                $location_override = isset($this->item['location_id']) ? $this->item['location_id'] : null;
+                $asset->fresh()->checkOut($target, $this->created_by, $checkout_date, null, 'Checkout from CSV Importer',  $asset->name, $location_override);
+            }
+            
+            // After save/checkout, ensure the location_id is set to the CSV location (overriding user's location)
+            // This applies to both create and update scenarios
+            if (isset($this->item['location_id'])) {
+                $asset->location_id = $this->item['location_id'];
+                $asset->save();
+                \Log::debug('Location override applied: ' . $this->item['location_id']);
             }
 
             return;

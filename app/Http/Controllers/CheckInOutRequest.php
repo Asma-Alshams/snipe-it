@@ -49,8 +49,8 @@ trait CheckInOutRequest
                 }
                 break;
             case 'user':
-                    $asset->location_id = $target->location_id;
-                    break;
+                $asset->location_id = $target->location_id;
+                break;
         }
 
         return $asset;
