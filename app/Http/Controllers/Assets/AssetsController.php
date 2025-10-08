@@ -1035,6 +1035,10 @@ class AssetsController extends Controller
     {
         $this->authorize('view', Asset::class);
 
+        // Increase memory and execution time limits for large datasets
+        ini_set('max_execution_time', env('REPORT_TIME_LIMIT', 12000)); // 12000 seconds = 200 minutes
+        ini_set('memory_limit', env('REPORT_MEMORY_LIMIT', '1G')); // 1GB memory limit
+
         $assetsQuery = Asset::with([
             'company',
             'model',
@@ -1072,7 +1076,16 @@ class AssetsController extends Controller
             });
         }
 
-        $assets = $assetsQuery->get();
+        // Collect all assets using chunked processing to handle large datasets
+        $allAssets = collect();
+        $assetsQuery->chunk(500, function ($assets) use (&$allAssets) {
+            foreach ($assets as $asset) {
+                $allAssets->push($asset);
+            }
+        });
+
+        // Debug: Log the number of assets found
+        \Log::debug('PDF Report: Found ' . $allAssets->count() . ' assets for user_id: ' . $request->input('user_id', 'none') . ', location_id: ' . $request->input('location_id', 'none'));
 
         // Branding/logo
         $branding_settings = \App\Http\Controllers\SettingsController::getPDFBranding();
@@ -1084,7 +1097,7 @@ class AssetsController extends Controller
         }
 
         $data = [
-            'assets' => $assets,
+            'assets' => $allAssets,
             'logo' => $logo,
             'user_id' => $request->input('user_id'),
             'location_id' => $request->input('location_id'),
