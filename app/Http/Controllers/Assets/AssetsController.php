@@ -67,11 +67,13 @@ class AssetsController extends Controller
         $company = Company::find($request->input('company_id'));
         $users = User::orderBy('first_name')->orderBy('last_name')->get(['id', 'first_name', 'last_name']);
         $locations = Location::orderBy('name')->get(['id', 'name']);
+        $categories = \App\Models\Category::where('category_type', 'asset')->orderBy('name')->get(['id', 'name']);
 
         return view('hardware/index')
             ->with('company', $company)
             ->with('users', $users)
-            ->with('locations', $locations);
+            ->with('locations', $locations)
+            ->with('categories', $categories);
     }
 
     /**
@@ -1049,7 +1051,7 @@ class AssetsController extends Controller
             'location',
             'assignedTo',
             'defaultLoc',
-        ])->orderBy('created_at', 'desc');
+        ])->orderBy('assets.created_at', 'desc');
 
         // Apply company scope
         Company::scopeCompanyables($assetsQuery);
@@ -1073,6 +1075,13 @@ class AssetsController extends Controller
                       $subQ->where('assigned_type', '=', Location::class)
                            ->where('assigned_to', '=', $locId);
                   });
+            });
+        }
+
+        // Filter by category
+        if ($request->filled('category_id')) {
+            $assetsQuery->whereHas('model.category', function($q) use ($request) {
+                $q->whereIn('categories.id', (array) $request->input('category_id'));
             });
         }
 
@@ -1101,6 +1110,7 @@ class AssetsController extends Controller
             'logo' => $logo,
             'user_id' => $request->input('user_id'),
             'location_id' => $request->input('location_id'),
+            'category_id' => $request->input('category_id'),
         ];
 
         $html = view('hardware.report_pdf', $data)->render();

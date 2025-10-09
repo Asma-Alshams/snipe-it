@@ -111,7 +111,7 @@
   (function() {
     var initSelects = function() {
       try {
-        $('#report_user_id, #report_location_id').select2({
+        $('#report_user_id, #report_location_id, #report_category_id').select2({
           width: '100%',
           allowClear: true
         });
@@ -130,7 +130,7 @@
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
-        <h4 class="modal-title" id="hardwareReportModalLabel">Generate Hardware Report</h4>
+        <h4 class="modal-title" id="hardwareReportModalLabel">Generate Assets Report</h4>
       </div>
       <div class="modal-body">
         <form id="hardwareReportForm" method="GET" action="{{ route('hardware.pdf') }}">
@@ -149,6 +149,15 @@
               <option value="">-- Any Location --</option>
               @foreach(($locations ?? []) as $loc)
                 <option value="{{ $loc->id }}">{{ $loc->name }}</option>
+              @endforeach
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="report_category_id">Filter by Category (optional)</label>
+            <select class="form-control select2" name="category_id" id="report_category_id" data-placeholder="-- Any Category --">
+              <option value="">-- Any Category --</option>
+              @foreach(($categories ?? []) as $cat)
+                <option value="{{ $cat->id }}">{{ $cat->name }}</option>
               @endforeach
             </select>
           </div>

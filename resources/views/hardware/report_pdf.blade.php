@@ -29,6 +29,9 @@
     @if(isset($location_id) && $location_id)
         <p style="text-align:center;">Location: {{ optional(\App\Models\Location::find($location_id))->name ?? $location_id }}</p>
     @endif
+    @if(isset($category_id) && $category_id)
+        <p style="text-align:center;">Category: {{ optional(\App\Models\Category::find($category_id))->name ?? $category_id }}</p>
+    @endif
     <p style="text-align:center;">Total Records: {{ $assets->count() }}</p>
 
     <table>
