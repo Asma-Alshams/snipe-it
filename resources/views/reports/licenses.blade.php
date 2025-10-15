@@ -36,6 +36,7 @@
                                 <th class="col-sm-1">{{ trans('general.depreciation') }}</th>
                                 <th class="col-sm-1 text-right">{{ trans('admin/hardware/table.book_value') }}</th>
                                 <th class="col-sm-1 text-right">{{ trans('admin/hardware/table.diff') }}</th>
+                                <th class="col-sm-1">{{ trans('general.notes') }}</th>
                             </tr>
                         </thead>
 
@@ -67,6 +68,7 @@
                                 <td class="text-right">
                                     -{{ $snipeSettings->default_currency }}{{ Helper::formatCurrencyOutput(($license->purchase_cost - $license->getDepreciatedValue())) }}
                                 </td>
+                                <td>{{ $license->notes }}</td>
                             </tr>
                             @endforeach
                         </tbody>

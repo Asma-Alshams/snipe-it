@@ -188,7 +188,7 @@ class LicensePresenter extends Presenter
                 'field' => 'notes',
                 'searchable' => true,
                 'sortable' => true,
-                'visible' => false,
+                'visible' => true,
                 'title' => trans('general.notes'),
                 'formatter' => 'notesFormatter',
             ],

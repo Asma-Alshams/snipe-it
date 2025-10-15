@@ -498,6 +498,7 @@ class ReportsController extends Controller
             trans('general.purchase_date'),
             trans('general.depreciation'),
             trans('general.purchase_cost'),
+            trans('general.notes'),
         ];
 
         $header = array_map('trim', $header);
@@ -514,6 +515,7 @@ class ReportsController extends Controller
             $row[] = $license->purchase_date;
             $row[] = ($license->depreciation != '') ? '' : e($license->depreciation->name);
             $row[] = '"'.Helper::formatCurrencyOutput($license->purchase_cost).'"';
+            $row[] = e($license->notes);
 
             $rows[] = implode(',', $row);
         }

@@ -45,10 +45,11 @@
                 <th>تاريخ الشراء</th>
                 <th>المصنع</th> -->
                 <th>التوقيع</th>
-                <th>مرخص بأسم</th>
+                <th>ملاحظات</th>
+                <!-- <th>مرخص بأسم</th> -->
                 <th>البريد الإلكتروني للمرخص له</th>
-                <th>تاريخ الانتهاء</th>
-                <th>الاسم</th>
+                <th>الانتهاء تاريخ</th>
+                <th>اسم التصريح</th>
                 <!-- <th>#</th> -->
             </tr>
         </thead>
@@ -69,8 +70,9 @@
                     <td>{{ $license->purchase_date ? \Carbon\Carbon::parse($license->purchase_date)->format('Y-m-d') : '-' }}</td>
                     <td>{{ $license->manufacturer ? $license->manufacturer->name : '-' }}</td> -->
                     <td style="color: white;">_______________________</td>
-                    <td>{{ $license->license_name ?? '-' }}</td>
-                    <td>{{ $license->license_email ?? '-' }}</td>
+                    <td>{{ $license->notes ?? '-' }}</td>
+                    <!-- <td>{{ $license->license_name ?? '-' }}</td> -->
+                    <td>{{ $license->license_email ?? '-' }} <br> {{ $license->license_name ?? '-' }}</td>
                     <td>{{ $license->expiration_date ? \Carbon\Carbon::parse($license->expiration_date)->format('Y-m-d') : '-' }}</td>
                     <td>{{ $license->name ?? '-' }}</td>
                     <!-- <td>{{ $license->id }}</td> -->
