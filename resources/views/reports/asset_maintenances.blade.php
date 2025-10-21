@@ -12,7 +12,7 @@
   <div class="col-md-12">
     <div class="box box-default">
       <div class="box-body">
-            <table
+            <table 
                     data-cookie-id-table="maintenancesReport"
                     data-show-footer="true"
                     data-id-table="maintenancesReport"

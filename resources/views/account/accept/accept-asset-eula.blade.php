@@ -56,7 +56,7 @@
         <br>
 <table>
     <tr class="label0">
-        <td colspan="2"> بيانات مقدم الطلب   </td>
+        <td colspan="2"> بيانات صاحب الطلب   </td>
     </tr>
     <tr>
         <td class="label">  المسمى الوظيفي  </td> 
@@ -83,11 +83,11 @@
         <td> {{ $asset->location->name ?? '' }} </td>
     </tr>
     <tr>
-        <td class="label"> تاريخ المتوقع تسليمه </td>
+        <td class="label"> تاريخ إرجاع العهده </td>
         <td class="label">  تاريخ التسليم  </td>
     </tr>
     <tr>
-        <td>   {{ $asset->expected_checkin ? \App\Helpers\Helper::getFormattedDateObject($asset->expected_checkin, 'date')["formatted"] : 'اصل ثابت' }}</td>
+        <td> {{ $asset->expected_checkin ? \App\Helpers\Helper::getFormattedDateObject($asset->expected_checkin, 'date')["formatted"] : 'اصل ثابت' }}</td>
         <td> {{$check_out_date}} </td>
     </tr> 
     <tr><td colspan="2" style="padding-top: 20px;"> <br> </td></tr>
