@@ -47,8 +47,10 @@
                 <th>التوقيع</th>
                 <th>ملاحظات</th>
                 <!-- <th>مرخص بأسم</th> -->
-                <th>البريد الإلكتروني للمرخص له</th>
-                <th>الانتهاء تاريخ</th>
+                <th>البريد الإلكتروني
+                    <br> للمرخص له</th>
+                <th> تاريخ
+                    <br> الانتهاء</th>
                 <th>اسم التصريح</th>
                 <!-- <th>#</th> -->
             </tr>
@@ -73,7 +75,7 @@
                     <td>{{ $license->notes ?? '-' }}</td>
                     <!-- <td>{{ $license->license_name ?? '-' }}</td> -->
                     <td>{{ $license->license_email ?? '-' }} <br> {{ $license->license_name ?? '-' }}</td>
-                    <td>{{ $license->expiration_date ? \Carbon\Carbon::parse($license->expiration_date)->format('Y-m-d') : '-' }}</td>
+                    <td>{{ $license->expiration_date ? \Carbon\Carbon::parse($license->expiration_date)->format('d-m-Y') : '-' }}</td>
                     <td>{{ $license->name ?? '-' }}</td>
                     <!-- <td>{{ $license->id }}</td> -->
                 </tr>
