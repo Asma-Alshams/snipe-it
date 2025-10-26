@@ -361,6 +361,11 @@ class ReportsController extends Controller
     public function generateActivityPdf(Request $request)
     {
         $this->authorize('reports.view');
+        
+        // Increase memory and execution time limits for large datasets
+        ini_set('max_execution_time', env('REPORT_TIME_LIMIT', 12000)); // 12000 seconds = 200 minutes
+        ini_set('memory_limit', env('REPORT_MEMORY_LIMIT', '1G')); // 1GB memory limit
+        
         $query = \App\Models\Actionlog::with('item', 'user', 'target', 'adminuser');
         $filterType = $request->input('filter_type');
         if ($filterType === 'date_location') {
@@ -387,9 +392,20 @@ class ReportsController extends Controller
                       ->whereDate('created_at', '<=', $request->input('end_date'));
             }
         }
-        $logs = $query->orderBy('created_at', 'desc')->get();
+        
+        // Collect all logs using chunked processing to handle large datasets
+        $allLogs = collect();
+        $query->orderBy('created_at', 'desc')->chunk(500, function ($logs) use (&$allLogs) {
+            foreach ($logs as $log) {
+                $allLogs->push($log);
+            }
+        });
+
+        // Debug: Log the number of logs found
+        \Log::debug('Activity PDF Report: Found ' . $allLogs->count() . ' activity logs for filter_type: ' . $request->input('filter_type', 'none'));
+        
         $rows = [];
-        foreach ($logs as $log) {
+        foreach ($allLogs as $log) {
             // Parse location changes from log_meta
             $location_changes = null;
             if ($log->log_meta) {

@@ -390,6 +390,11 @@ class AssetMaintenancesController extends Controller
     public function exportAllRecentPdf(Request $request)
     {
         $this->authorize('view', Asset::class);
+        
+        // Increase memory and execution time limits for large datasets
+        ini_set('max_execution_time', env('REPORT_TIME_LIMIT', 12000)); // 12000 seconds = 200 minutes
+        ini_set('memory_limit', env('REPORT_MEMORY_LIMIT', '1G')); // 1GB memory limit
+        
         $maintenancesQuery = \App\Models\AssetMaintenance::with([
             'asset',
             'asset.assignedTo',
@@ -428,10 +433,20 @@ class AssetMaintenancesController extends Controller
                                   ->whereDate('completion_date', '<=', $end);
             }
         }
-        $maintenances = $maintenancesQuery->orderBy('created_at', 'desc')->get();
+        
+        // Collect all maintenances using chunked processing to handle large datasets
+        $allMaintenances = collect();
+        $maintenancesQuery->orderBy('created_at', 'desc')->chunk(500, function ($maintenances) use (&$allMaintenances) {
+            foreach ($maintenances as $maintenance) {
+                $allMaintenances->push($maintenance);
+            }
+        });
+
+        // Debug: Log the number of maintenances found
+        \Log::debug('Maintenance PDF Report: Found ' . $allMaintenances->count() . ' maintenances for filter: ' . $request->input('filter', 'none'));
         
         // Add custom field values to each maintenance
-        foreach ($maintenances as $maintenance) {
+        foreach ($allMaintenances as $maintenance) {
             if ($maintenance->asset) {
                 $maintenance->macAddress = $maintenance->asset->getAttribute('_snipeit_mac_address_1');
                 // Compute maintenance status consistently with other reports
@@ -460,7 +475,7 @@ class AssetMaintenancesController extends Controller
             $logo = public_path() . '/uploads/' . $branding_settings->logo;
         }
         $data = [
-            'maintenances' => $maintenances,
+            'maintenances' => $allMaintenances,
             'logo' => $logo,
             'filter' => $request->input('filter'),
             'start_date' => $request->input('start_date'),
@@ -541,6 +556,11 @@ class AssetMaintenancesController extends Controller
     public function exportDeclinedPdf(Request $request)
     {
         $this->authorize('view', Asset::class);
+        
+        // Increase memory and execution time limits for large datasets
+        ini_set('max_execution_time', env('REPORT_TIME_LIMIT', 12000)); // 12000 seconds = 200 minutes
+        ini_set('memory_limit', env('REPORT_MEMORY_LIMIT', '1G')); // 1GB memory limit
+        
         $maintenancesQuery = \App\Models\AssetMaintenance::with([
             'asset',
             'asset.assignedTo',
@@ -584,9 +604,20 @@ class AssetMaintenancesController extends Controller
                                   ->whereDate('completion_date', '<=', $end);
             }
         }
-        $maintenances = $maintenancesQuery->orderBy('created_at', 'desc')->get();
+        
+        // Collect all maintenances using chunked processing to handle large datasets
+        $allMaintenances = collect();
+        $maintenancesQuery->orderBy('created_at', 'desc')->chunk(500, function ($maintenances) use (&$allMaintenances) {
+            foreach ($maintenances as $maintenance) {
+                $allMaintenances->push($maintenance);
+            }
+        });
+
+        // Debug: Log the number of declined maintenances found
+        \Log::debug('Declined Maintenance PDF Report: Found ' . $allMaintenances->count() . ' declined maintenances for filter: ' . $request->input('filter', 'none'));
+        
         // Add custom field values to each maintenance
-        foreach ($maintenances as $maintenance) {
+        foreach ($allMaintenances as $maintenance) {
             if ($maintenance->asset) {
                 $maintenance->macAddress = $maintenance->asset->getAttribute('_snipeit_mac_address_1');
                 $maintenance->maintenanceStatus = self::getMaintenanceStatus($maintenance);
@@ -612,7 +643,7 @@ class AssetMaintenancesController extends Controller
             $logo = public_path() . '/uploads/' . $branding_settings->logo;
         }
         $data = [
-            'maintenances' => $maintenances,
+            'maintenances' => $allMaintenances,
             'logo' => $logo,
             'filter' => $request->input('filter'),
             'start_date' => $request->input('start_date'),

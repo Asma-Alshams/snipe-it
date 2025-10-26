@@ -415,6 +415,10 @@ class LicensesController extends Controller
     {
         $this->authorize('view', License::class);
         
+        // Increase memory and execution time limits for large datasets
+        ini_set('max_execution_time', env('REPORT_TIME_LIMIT', 12000)); // 12000 seconds = 200 minutes
+        ini_set('memory_limit', env('REPORT_MEMORY_LIMIT', '1G')); // 1GB memory limit
+        
         $licensesQuery = License::with([
             'company',
             'manufacturer',
@@ -447,7 +451,16 @@ class LicensesController extends Controller
         }
         // If no filters provided, show all licenses (full report)
 
-        $licenses = $licensesQuery->get();
+        // Collect all licenses using chunked processing to handle large datasets
+        $allLicenses = collect();
+        $licensesQuery->chunk(500, function ($licenses) use (&$allLicenses) {
+            foreach ($licenses as $license) {
+                $allLicenses->push($license);
+            }
+        });
+
+        // Debug: Log the number of licenses found
+        \Log::debug('Licenses PDF Report: Found ' . $allLicenses->count() . ' licenses for filter: ' . $request->input('filter', 'none'));
         
         // Get branding settings for logo
         $branding_settings = \App\Http\Controllers\SettingsController::getPDFBranding();
@@ -459,7 +472,7 @@ class LicensesController extends Controller
         }
         
         $data = [
-            'licenses' => $licenses,
+            'licenses' => $allLicenses,
             'logo' => $logo,
             'filter' => $request->input('filter'),
             'start_date' => $request->input('start_date'),
