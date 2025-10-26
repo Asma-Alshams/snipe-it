@@ -23,6 +23,7 @@ use App\Models\Consumable;
 use App\Notifications\AcceptanceAssetAcceptedNotification;
 use App\Notifications\AcceptanceAssetAcceptedToUserNotification;
 use App\Notifications\AcceptanceAssetDeclinedNotification;
+use App\Services\TcpdfService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -79,13 +80,13 @@ class AcceptanceController extends Controller
     }
 
     /**
-     * Generate PDF using Gpdf facade with TCPDF for notes section
+     * Generate PDF using TcpdfService
      *
      * @param string $viewRoute
      * @param array $data
      * @return string
      */
-    private function generatePdfWithGpdf(string $viewRoute, array $data): string
+    private function generatePdfWithTcpdf(string $viewRoute, array $data): string
     {
         // Generate TCPDF content for notes section if notes are present
         if (isset($data['checkin_note']) || isset($data['checkout_note']) || isset($data['acceptance_note'])) {
@@ -108,7 +109,15 @@ class AcceptanceController extends Controller
         }
         
         $html = view($viewRoute, $data)->render();
-        return GpdfFacade::generate($html);
+        
+        // Use the new TCPDF service
+        $pdfService = TcpdfService::createForReport('Asset EULA Acceptance', 'Asset EULA Acceptance Form');
+        
+        $pdfService->addPage()
+                   ->setFont('notonaskharabicnormal', '', 12)
+                   ->writeHtml($html);
+        
+        return $pdfService->output('asset-eula.pdf', 'S');
     }
 
     /**
@@ -153,14 +162,18 @@ class AcceptanceController extends Controller
             }
         }
         
-        // Generate PDF using the accept-asset-eula template
+        // Generate PDF using the accept-asset-eula template with TCPDF
         $html = view('account.accept.accept-asset-eula', $data)->render();
-        $pdfContent = GpdfFacade::generate($html);
         
-        return response($pdfContent, 200, [
-            'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'attachment; filename="' . $fileName . '-' . date('Y-m-d-his') . '.pdf"'
-        ]);
+        // Use the new TCPDF service
+        $pdfService = TcpdfService::createForReport('Asset EULA Acceptance', 'Asset EULA Acceptance Form');
+        
+        $pdfService->addPage()
+                   ->setFont('notonaskharabicnormal', '', 12)
+                   ->writeHtml($html);
+        
+        $filename = $fileName . '-' . date('Y-m-d-his') . '.pdf';
+        return $pdfService->response($filename);
     }
     
     /**
@@ -336,12 +349,16 @@ class AcceptanceController extends Controller
         }
 
         $html = view('account.accept.accept-asset-eula', $data)->render();
-        $pdfContent = GpdfFacade::generate($html);
         
-        return response($pdfContent, 200, [
-            'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'attachment; filename="asset-eula-' . date('Y-m-d-his') . '.pdf"'
-        ]);
+        // Use the new TCPDF service
+        $pdfService = TcpdfService::createForReport('Asset EULA Acceptance', 'Asset EULA Acceptance Form');
+        
+        $pdfService->addPage()
+                   ->setFont('notonaskharabicnormal', '', 12)
+                   ->writeHtml($html);
+        
+        $filename = 'asset-eula-' . date('Y-m-d-his') . '.pdf';
+        return $pdfService->response($filename);
     }
 
     /**
@@ -532,7 +549,7 @@ $checkin_note = ($lastCheckinLog && !empty($lastCheckinLog->note)) ? $lastChecki
             if ($pdf_view_route!='') {
                 Log::debug($pdf_filename.' is the filename, and the route was specified.');
                 // Use Gpdf instead of DomPDF
-                $pdfContent = $this->generatePdfWithGpdf($pdf_view_route, $data);
+                $pdfContent = $this->generatePdfWithTcpdf($pdf_view_route, $data);
                 Storage::put('private_uploads/eula-pdfs/' .$pdf_filename, $pdfContent);
             }
 
@@ -638,7 +655,7 @@ $checkin_note = ($lastCheckinLog && !empty($lastCheckinLog->note)) ? $lastChecki
             if ($pdf_view_route!='') {
                 Log::debug($pdf_filename.' is the filename, and the route was specified.');
                 // Use Gpdf instead of DomPDF
-                $pdfContent = $this->generatePdfWithGpdf($pdf_view_route, $data);
+                $pdfContent = $this->generatePdfWithTcpdf($pdf_view_route, $data);
                 Storage::put('private_uploads/eula-pdfs/' .$pdf_filename, $pdfContent);
             }
 

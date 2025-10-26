@@ -6,51 +6,60 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta http-equiv="Content-Type" content="text/html">
     <style>
-      @page {
-  margin: 3mm 10mm 3mm 10mm; /* top, right, bottom, left */
-}
         body {
-            font-family:'Dejavu Sans', sans-serif;
-            font-size: 16px;
-            /* direction: rtl; */
             text-align: center;
-            margin: 0;
-            font-weight: 500;
         }
         table {
             width: 100%;
             border-collapse: collapse;
-            text-align: center;
-            font-family: 'DejaVu Sans', sans-serif;
+            padding: 5px;
         }
-        td {
-            padding:2px;
-        }
-        tr:nth-child(odd) td {
-            border:1px solid black;
-        }
-        tr:nth-child(even) td {
-            border: none;
-        }
+    
         .label0 {
             color: #00008B;
-            font-weight: 600;
+            font-weight: bold;
+            font-size: 15px;
+            font-family: 'aealarabiya';
         }
         .label {
-            font-weight: 500;
+            font-weight: bold;
             color: grey;
+            font-size: 13px;
+            font-family: 'aealarabiya';
+            border: none;
+        }
+        td {  
+            border:1px solid black;
+        }
+        .header {
+            
+            font-weight: bold;
+            font-family: 'aealarabiya', sans-serif;
+        }
+        h3 {
+            color: #00008B;
+            font-weight: bold;
+            font-size: 16px;
+            font-family: 'aealarabiya';
+            
+        }
+        .eula-content {
+           text-align: right;
+           padding: 20px;
+            font-size: 10px;
+            font-family: 'notonaskharabicnormal', sans-serif;
+        }
+        .no-border {
+            border: none;
         }
     </style>
 </head>
 <body>
-
-@if ($logo)
-    <center>
-        <img  width="100%" src="{{ $logo }}">
-    </center>
-@endif
+@if (!empty($logo))
+            <img src="{{ $logo }}" alt="Logo" class="logo" style="width: 600px; "/>   
+        @endif
         <br>
-        <h3 style="margin: 0; font-weight: 600; color: #00008B;">
+        <h3 style="font-weight: 600; color: #00008B; font-size: 16px;">
             استمارة تسليم واستلام عهدة من إدارة النظم والحلول الرقمية 
         </h3>
         <br>
@@ -90,7 +99,7 @@
         <td> {{ $asset->expected_checkin ? \App\Helpers\Helper::getFormattedDateObject($asset->expected_checkin, 'date')["formatted"] : 'اصل ثابت' }}</td>
         <td> {{$check_out_date}} </td>
     </tr> 
-    <tr><td colspan="2" style="padding-top: 20px;"> <br> </td></tr>
+    <tr ><td class="no-border" colspan="2" style="padding-top: 20px;"></td></tr>
     <tr class="label0">
         <td colspan="2"> بيانات الجهاز  </td>
     </tr>
@@ -107,9 +116,10 @@
         <td class="label">   علامة الاصل  </td>
     </tr>
     <tr>
-        <td>{{ $item_serial ?? '' }}</td>
+        <td>{{ $item_serial ?? '-' }}</td>
         <td>  {{ $item_tag ?? '' }}  </td>
-    </tr> 
+    </tr>
+    <tr>
         <td class="label">الملحقات</td>
         <td class="label">تاريخ الشراء</td>
     </tr>
@@ -118,28 +128,39 @@
         <td>{{ $asset->purchase_date ? \App\Helpers\Helper::getFormattedDateObject($asset->purchase_date, 'date')["formatted"] : '-' }}</td>
     </tr>
     
-    <tr><td colspan="2" style="padding-top: 10px;"> <br> </td></tr>
+    <tr><td class="no-border" colspan="2" style="padding-top: 20px;"> </td></tr>
     <tr>
         <td colspan="2" style="border: none;">
-           
+            <table width="100%">
+                <tr>
+                <!-- <td width="33%" style="border: 1px solid #000; padding: 5px;  font-family: 'notonaskharabicnormal', sans-serif; font-size: 10px;">
+                <strong style="color: grey; font-family: 'aealarabiya';font-size: 13px;">ملاحظات التسليم</strong><br>
+                        {{ $checkin_note ?? '' }}
+                    </td> -->
+                    <td width="50%" style="border: 1px solid #000; padding: 5px;  font-family: 'notonaskharabicnormal', sans-serif; font-size: 10px;">
+                    <strong style="color: grey; font-family: 'aealarabiya';font-size: 13px;">ملاحظة الموافقة</strong><br>
+                        {{ $acceptance_note ?? '' }}
+                    </td>
+                    <td width="50%" style="border: 1px solid #000; padding: 5px;  font-family: 'notonaskharabicnormal', sans-serif; font-size: 10px;">
+                        <strong style="color: grey; font-family: 'aealarabiya';font-size: 13px;">ملاحظات الاستلام</strong><br>
+                        {{ $checkout_note ?? '' }}
+                    </td>
+                </tr>
+            </table>
         </td>
     </tr> 
             <div style="page-break-before: always;"></div>
-    <tr>
-    <tr class="label0">
-        <td colspan="2">  اتفاقية مستخدمي أجهزة الحاسب المحمول والأجهزة اللوحية </td>
+    <tr class="label0" >
+        <td style="border: none;" colspan="2">  اتفاقية مستخدمي أجهزة الحاسب المحمول والأجهزة اللوحية </td>
     </tr>
     <tr>
-        <td colspan="2" style="text-align: center;"> 
-            <div style="border: 1px solid #000; padding-right: 35px; padding-left: 35px; padding-top: 15px; text-align: right; font-size: 13px;">
+        <td colspan="2"> 
+            <div class="eula-content">
             @if ($eula)
-        
                 {!! $eula !!}
-
             @endif
             </div>
         </td>  
-  
     </tr>
     <!-- <tr>
         <td colspan="2" style="border: none;">
@@ -153,11 +174,15 @@
     </tr> -->
 </table>      
 
-@if ($signature!='')
-<img src="{{ $signature }}" style="max-width: 350px; border-bottom: black solid 1px;">
+
+@if($signature)
+    <img src="{{ $signature }}" alt="Signature" style="max-width:350px;" />
+@else
+    -
 @endif
-<p>{{$assigned_to}}    <br>   
-تاريخ القبول: {{$accepted_date}}
-    </p>
+<p style="font-family: 'notonaskharabicnormal', sans-serif; font-size: 11px; ">
+    {{$assigned_to}}<br>   
+    تاريخ القبول: {{$accepted_date}}
+</p>
 </body>
 </html>
