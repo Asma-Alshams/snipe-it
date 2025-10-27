@@ -45,8 +45,8 @@
         }
         .eula-content {
            text-align: right;
-           padding: 20px;
-            font-size: 10px;
+           padding: 10px;
+            font-size: 9.5px;
             font-family: 'notonaskharabicnormal', sans-serif;
         }
         .no-border {
@@ -176,7 +176,7 @@
 
 
 @if($signature)
-    <img src="{{ $signature }}" alt="Signature" style="max-width:350px;" />
+    <img src="{{ $signature }}" alt="Signature" style="max-width:250px;" />
 @else
     -
 @endif
