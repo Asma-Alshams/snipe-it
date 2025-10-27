@@ -176,7 +176,7 @@
 
 
 @if($signature)
-    <img src="{{ $signature }}" alt="Signature" style="max-width:250px;" />
+    <img src="{{ $signature }}" alt="Signature" style="max-width:150px;" />
 @else
     -
 @endif

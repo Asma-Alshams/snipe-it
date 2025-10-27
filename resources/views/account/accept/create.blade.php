@@ -58,7 +58,7 @@
                                     {{ \App\Helpers\Helper::getFormattedDateObject($acceptance->created_at, 'date')["formatted"] }}
                                     &nbsp;
                                     @if($acceptance->checkoutable->expected_checkin)
-                                        {{ __('تاريخ الاسترجاع المتوقع') }}: {{ \App\Helpers\Helper::getFormattedDateObject($acceptance->checkoutable->expected_checkin, 'date')["formatted"] }}
+                                        {{ __('تاريخ الاسترجاع') }}: {{ \App\Helpers\Helper::getFormattedDateObject($acceptance->checkoutable->expected_checkin, 'date')["formatted"] }}
                                     @else
                                        ( {{ __('اصل ثابت') }} )
                                     @endif
